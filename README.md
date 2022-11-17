@@ -1,1 +1,1 @@
-#Symbolic Interval Decision Diagram (SIDD)
+# Symbolic Interval Decision Diagram (SIDD)
