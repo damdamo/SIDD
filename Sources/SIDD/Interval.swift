@@ -1,8 +1,9 @@
+/// Definition of an interval
 public struct Interval <K: Comparable>: Equatable {
   
   let intvl: Intvl<K>?
   
-  // Check that in <a,b>, a < b and if a = b, then only [a,a] is possible
+  /// Check that in <a,b>, a < b and if a = b, then only [a,a] is possible
   init(intvl: Intvl<K>) {
     switch intvl {
     case .empty:
@@ -25,7 +26,7 @@ public struct Interval <K: Comparable>: Equatable {
     }
   }
     
-  // Left bracket
+  /// Left bracket
   enum Lbracket {
     // i = [
     case i
@@ -33,7 +34,7 @@ public struct Interval <K: Comparable>: Equatable {
     case e
   }
   
-  // Right bracket
+  /// Right bracket
   enum Rbracket {
     // i = ]
     case i
@@ -41,7 +42,7 @@ public struct Interval <K: Comparable>: Equatable {
     case e
   }
   
-  // Interval writing
+  /// Interval writing
   enum Intvl<K: Comparable>: Equatable {
     // Ø interval
     case empty
@@ -83,8 +84,8 @@ public struct Interval <K: Comparable>: Equatable {
 
   }
   
-  // Checks the left and right brackets and returns the merging of these where the inclusion take precedence.
-  // E.g.: [,( -> [
+  /// Checks the left and right brackets and returns the merging of these where the inclusion take precedence.
+  /// E.g.: [,( -> [
   static func strongInclusion(l1: Lbracket,r1: Rbracket, l2: Lbracket, r2: Rbracket) -> (Lbracket, Rbracket) {
     var l: Lbracket
     var r: Rbracket
@@ -107,8 +108,8 @@ public struct Interval <K: Comparable>: Equatable {
     return (l,r)
   }
   
-  // Checks the left and right brackets and returns the merging of these where the exclusion take precedence.
-  // E.g.: [,( -> (
+  /// Checks the left and right brackets and returns the merging of these where the exclusion take precedence.
+  /// E.g.: [,( -> (
   static func strongExclusion(l1: Lbracket,r1: Rbracket, l2: Lbracket, r2: Rbracket) -> (Lbracket, Rbracket) {
     var l: Lbracket
     var r: Rbracket
