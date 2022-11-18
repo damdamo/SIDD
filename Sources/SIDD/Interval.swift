@@ -1,44 +1,69 @@
-// TODO: Change Interval enum into a structure, to give constraints to init, a < b, and no (a,a), (a,a] and [a,a)
-
-
-// Left bracket
-public enum Lbracket {
-  // i = [
-  case i
-  // e = (
-  case e
-}
-
-// Right bracket
-public enum Rbracket {
-  // i = ]
-  case i
-  // e = )
-  case e
-}
-
-public enum Interval<K: Comparable>: Equatable {
-  // Ø interval
-  case empty
-  // Non empty interval of the form: [a,b] or [a,b) or (a,b] or (a,b)
-  case intvl(lbracket: Lbracket, a: K, b: K, rbracket: Rbracket)
+public struct Interval <K: Comparable>: Equatable {
+  
+  let intvl: Intvl<K>?
+  
+  // Check that in <a,b>, a < b and if a = b, then only [a,a] is possible
+  init(intvl: Intvl<K>) {
+    switch intvl {
+    case .empty:
+      self.intvl = intvl
+    case .intvl(lbracket: let l, a: let a, b: let b, rbracket: let r):
+      if a <= b {
+        if a == b {
+          switch (l,r) {
+          case (.i, .i):
+            self.intvl = intvl
+          default:
+            self.intvl = Intvl.empty
+          }
+        } else {
+          self.intvl = intvl
+        }
+      } else {
+        self.intvl = nil
+      }
+    }
+  }
+    
+  // Left bracket
+  enum Lbracket {
+    // i = [
+    case i
+    // e = (
+    case e
+  }
+  
+  // Right bracket
+  enum Rbracket {
+    // i = ]
+    case i
+    // e = )
+    case e
+  }
+  
+  // Interval writing
+  enum Intvl<K: Comparable>: Equatable {
+    // Ø interval
+    case empty
+    // Non empty interval of the form: [a,b] or [a,b) or (a,b] or (a,b)
+    case intvl(lbracket: Lbracket, a: K, b: K, rbracket: Rbracket)
+  }
   
   /// Intersection between two intervals
   /// - Parameters:
-  ///   - i1: First interval
-  ///   - i2: Second interval
+  ///   - i:  Interval to intersect
   /// - Returns: The result of the intersection
-  public static func intersection(i1: Interval, i2: Interval) -> Interval {
+  public func intersection(_ i: Interval<K>) -> Interval<K>? {
     var k1: K
     var k2: K
-    switch (i1, i2) {
+    switch (self.intvl, i.intvl) {
     case (_, .empty):
-      return i1
+      return self
     case (.empty, _):
-      return i2
+      return i
     case (.intvl(let l1, let a, let b, let r1), .intvl(let l2, let c, let d, let r2)):
       if b < c {
-        return .empty
+        return Interval(intvl: .empty)
       } else if a <= c && b >= c && b <= d {
         k1 = c
         k2 = b
@@ -46,17 +71,21 @@ public enum Interval<K: Comparable>: Equatable {
         k1 = c
         k2 = d
       } else {
-        return intersection(i1: i2, i2: i1)
+        return i.intersection(self)
       }
-      let (l,r) = strongExclusion(l1: l1,r1: r1, l2: l2, r2: r2)
+      let (l,r) = Interval<K>.strongExclusion(l1: l1,r1: r1, l2: l2, r2: r2)
       
-      return .intvl(lbracket: l, a: k1, b: k2, rbracket: r)
+      return Interval(intvl: .intvl(lbracket: l, a: k1, b: k2, rbracket: r))
+      
+    default:
+      return nil
     }
+
   }
   
   // Checks the left and right brackets and returns the merging of these where the inclusion take precedence.
   // E.g.: [,( -> [
-  private static func strongInclusion(l1: Lbracket,r1: Rbracket, l2: Lbracket, r2: Rbracket) -> (Lbracket, Rbracket) {
+  static func strongInclusion(l1: Lbracket,r1: Rbracket, l2: Lbracket, r2: Rbracket) -> (Lbracket, Rbracket) {
     var l: Lbracket
     var r: Rbracket
     switch (l1, l2) {
@@ -80,7 +109,7 @@ public enum Interval<K: Comparable>: Equatable {
   
   // Checks the left and right brackets and returns the merging of these where the exclusion take precedence.
   // E.g.: [,( -> (
-  private static func strongExclusion(l1: Lbracket,r1: Rbracket, l2: Lbracket, r2: Rbracket) -> (Lbracket, Rbracket) {
+  static func strongExclusion(l1: Lbracket,r1: Rbracket, l2: Lbracket, r2: Rbracket) -> (Lbracket, Rbracket) {
     var l: Lbracket
     var r: Rbracket
     switch (l1, l2) {
@@ -101,5 +130,6 @@ public enum Interval<K: Comparable>: Equatable {
     }
     return (l,r)
   }
+
   
 }
