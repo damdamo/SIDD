@@ -1,5 +1,18 @@
 /// Definition of an interval
-public struct Interval <K: Comparable>: Equatable {
+public struct Interval <K: Comparable & Hashable>: Hashable {
+//  public static func < (lhs: Interval<K>, rhs: Interval<K>) -> Bool {
+//    switch (lhs.intvl, rhs.intvl) {
+//    case (_, .empty):
+//      return false
+//    case (.empty, _):
+//      return true
+//    case (.intvl(lbracket: let l1, a: let a1, b: let b1, rbracket: let r1), .intvl(lbracket: let l2, a: let a2, b: let b2, rbracket: let r2)):
+//      return true
+//    default:
+//      return false
+//    }
+//  }
+  
   
   let intvl: Intvl<K>?
   
@@ -27,7 +40,7 @@ public struct Interval <K: Comparable>: Equatable {
   }
     
   /// Left bracket
-  enum Lbracket {
+  enum Lbracket: Hashable {
     // i = [
     case i
     // e = (
@@ -35,7 +48,7 @@ public struct Interval <K: Comparable>: Equatable {
   }
   
   /// Right bracket
-  enum Rbracket {
+  enum Rbracket: Hashable {
     // i = ]
     case i
     // e = )
@@ -43,7 +56,7 @@ public struct Interval <K: Comparable>: Equatable {
   }
   
   /// Interval writing
-  enum Intvl<K: Comparable>: Equatable {
+  enum Intvl<K: Comparable & Hashable>: Hashable {
     // Ø interval
     case empty
     // Non empty interval of the form: [a,b] or [a,b) or (a,b] or (a,b)
@@ -132,5 +145,8 @@ public struct Interval <K: Comparable>: Equatable {
     return (l,r)
   }
 
+  public func hash(into hasher: inout Hasher) {
+      hasher.combine(intvl)
+  }
   
 }
