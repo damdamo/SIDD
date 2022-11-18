@@ -72,9 +72,9 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
     var k2: K
     switch (self.intvl, i.intvl) {
     case (_, .empty):
-      return self
-    case (.empty, _):
       return i
+    case (.empty, _):
+      return self
     case (.intvl(let l1, let a, let b, let r1), .intvl(let l2, let c, let d, let r2)):
       if b < c {
         return Interval(intvl: .empty)
@@ -87,62 +87,115 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
       } else {
         return i.intersection(self)
       }
-      let (l,r) = Interval<K>.strongExclusion(l1: l1,r1: r1, l2: l2, r2: r2)
-      
-      return Interval(intvl: .intvl(lbracket: l, a: k1, b: k2, rbracket: r))
-      
+      return Interval(intvl: .intvl(
+        lbracket: Interval<K>.strongLeftExclusion(l1: l1, l2: l2),
+        a: k1,
+        b: k2,
+        rbracket: Interval<K>.strongRightExclusion(r1: r1, r2: r2))
+      )
     default:
       return nil
     }
 
   }
   
-  /// Checks the left and right brackets and returns the merging of these where the inclusion take precedence.
-  /// E.g.: [,( -> [
-  static func strongInclusion(l1: Lbracket,r1: Rbracket, l2: Lbracket, r2: Rbracket) -> (Lbracket, Rbracket) {
-    var l: Lbracket
-    var r: Rbracket
-    switch (l1, l2) {
-    case (.i,_):
-      l = .i
-    case (_, .i):
-      l = .i
-    default:
-      l = .e
+  /// Union between two intervals
+  /// - Parameters:
+  ///   - i:  Interval to merge
+  /// - Returns: The result of the union, that is a set of intervals
+//  public func union(_ i: Interval) -> SetIntervals<K> {
+//
+//    var k1: K
+//    var k2: K
+//
+//    if let r = self.intersection(i)?.isEmpty() {
+//      if r == true {
+//        return SetIntervals(setIntervals: [self,i])
+//      }
+//    }
+//
+//    switch (self.intvl, i.intvl) {
+//    case (_, .empty):
+//      return SetIntervals(setIntervals: [self])
+//    case (.empty, _):
+//      return SetIntervals(setIntervals: [i])
+//    case (.intvl(let l1, let a, let b, let r1), .intvl(let l2, let c, let d, let r2)):
+//      if a <= c && b >= c && b < d {
+//        k1 = a
+//        k2 = d
+//      } else if a <= c && b >= d {
+//        k1 = a
+//        k2 = b
+//      } else {
+//        return i.union(self)
+//      }
+//      let (l,r) = Interval<K>.strongInclusion(l1: l1,r1: r1, l2: l2, r2: r2)
+//
+//      return Interval(intvl: .intvl(lbracket: l, a: k1, b: k2, rbracket: r))
+//
+//    default:
+//      return nil
+//    }
+//  }
+  
+  public func isEmpty() -> Bool {
+    if self.intvl == .empty {
+      return true
     }
-    switch (r1, r2) {
-    case (.i,_):
-      r = .i
-    case (_, .i):
-      r = .i
-    default:
-      r = .e
-    }
-    return (l,r)
+    return false
   }
   
-  /// Checks the left and right brackets and returns the merging of these where the exclusion take precedence.
+  /// Checks the left brackets and returns the merging of these where the inclusion take precedence.
+  /// E.g.: [,( -> [
+  static func strongLeftInclusion(l1: Lbracket, l2: Lbracket) -> Lbracket {
+    switch (l1, l2) {
+    case (.i,_):
+      return .i
+    case (_, .i):
+      return .i
+    default:
+      return .e
+    }
+  }
+  
+  /// Checks the right brackets and returns the merging of these where the inclusion take precedence.
+  /// E.g.: [,( -> [
+  static func strongRightInclusion(r1: Rbracket, r2: Rbracket) -> Rbracket {
+    switch (r1, r2) {
+    case (.i,_):
+      return .i
+    case (_, .i):
+      return .i
+    default:
+      return .e
+    }
+  }
+  
+  
+  /// Checks the left brackets and returns the merging of these where the exclusion take precedence.
   /// E.g.: [,( -> (
-  static func strongExclusion(l1: Lbracket,r1: Rbracket, l2: Lbracket, r2: Rbracket) -> (Lbracket, Rbracket) {
-    var l: Lbracket
-    var r: Rbracket
+  static func strongLeftExclusion(l1: Lbracket, l2: Lbracket) -> Lbracket {
     switch (l1, l2) {
     case (.e,_):
-      l = .e
+      return .e
     case (_, .e):
-      l = .e
+      return .e
     default:
-      l = .i
+      return .i
     }
+  }
+  
+  /// Checks the right brackets and returns the merging of these where the exclusion take precedence.
+  /// E.g.: [,( -> (
+  static func strongRightExclusion(r1: Rbracket, r2: Rbracket) -> Rbracket {
     switch (r1, r2) {
     case (.e,_):
-      r = .e
+      return .e
     case (_, .e):
-      r = .e
+      return .e
     default:
-      r = .i
+      return .i
     }
-    return (l,r)
   }
 
   public func hash(into hasher: inout Hasher) {
