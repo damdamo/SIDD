@@ -1,18 +1,5 @@
 /// Definition of an interval
-public struct Interval <K: Comparable & Hashable>: Hashable {
-//  public static func < (lhs: Interval<K>, rhs: Interval<K>) -> Bool {
-//    switch (lhs.intvl, rhs.intvl) {
-//    case (_, .empty):
-//      return false
-//    case (.empty, _):
-//      return true
-//    case (.intvl(lbracket: let l1, a: let a1, b: let b1, rbracket: let r1), .intvl(lbracket: let l2, a: let a2, b: let b2, rbracket: let r2)):
-//      return true
-//    default:
-//      return false
-//    }
-//  }
-  
+public struct Interval <K: Comparable & Hashable>: Hashable {  
   
   let intvl: Intvl<K>?
   
@@ -67,7 +54,7 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
   /// - Parameters:
   ///   - i:  Interval to intersect
   /// - Returns: The result of the intersection
-  public func intersection(_ i: Interval<K>) -> Interval<K>? {
+  func intersection(_ i: Interval<K>) -> Interval<K>? {
     var k1: K
     var k2: K
     switch (self.intvl, i.intvl) {
@@ -103,42 +90,55 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
   /// - Parameters:
   ///   - i:  Interval to merge
   /// - Returns: The result of the union, that is a set of intervals
-//  public func union(_ i: Interval) -> SetIntervals<K> {
-//
-//    var k1: K
-//    var k2: K
-//
-//    if let r = self.intersection(i)?.isEmpty() {
-//      if r == true {
-//        return SetIntervals(setIntervals: [self,i])
-//      }
-//    }
-//
-//    switch (self.intvl, i.intvl) {
-//    case (_, .empty):
-//      return SetIntervals(setIntervals: [self])
-//    case (.empty, _):
-//      return SetIntervals(setIntervals: [i])
-//    case (.intvl(let l1, let a, let b, let r1), .intvl(let l2, let c, let d, let r2)):
-//      if a <= c && b >= c && b < d {
-//        k1 = a
-//        k2 = d
-//      } else if a <= c && b >= d {
-//        k1 = a
-//        k2 = b
-//      } else {
-//        return i.union(self)
-//      }
-//      let (l,r) = Interval<K>.strongInclusion(l1: l1,r1: r1, l2: l2, r2: r2)
-//
-//      return Interval(intvl: .intvl(lbracket: l, a: k1, b: k2, rbracket: r))
-//
-//    default:
-//      return nil
-//    }
-//  }
+  func union(_ i: Interval) -> SetIntervals<K>? {
+    return self.unionCore(i)
+  }
   
-  public func isEmpty() -> Bool {
+  /// Union logic of two intervals
+  private func unionCore(_ i: Interval) -> SetIntervals<K>? {
+
+    if let r = self.intersection(i)?.isEmpty() {
+      if r == true {
+        return SetIntervals(setIntervals: [self,i])
+      }
+    }
+
+    switch (self.intvl, i.intvl) {
+    case (_, .empty):
+      return SetIntervals(setIntervals: [self])
+    case (.empty, _):
+      return SetIntervals(setIntervals: [i])
+    case (.intvl(let l1, let a, let b, let r1), .intvl(let l2, let c, let d, let r2)):
+      var lb: Lbracket
+      var rb: Rbracket
+      if a <= c && b >= c && b < d {
+        if a == c {
+          lb = Interval<K>.strongLeftInclusion(l1: l1, l2: l2)
+        } else {
+          lb = l1
+        }
+        return SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: lb, a: a, b: d, rbracket: r2))])
+      } else if a <= c && b >= d {
+        if a == c {
+          lb = Interval<K>.strongLeftInclusion(l1: l1, l2: l2)
+        } else {
+          lb = l1
+        }
+        if b == d {
+          rb = Interval<K>.strongRightInclusion(r1: r1, r2: r2)
+        } else {
+          rb = r1
+        }
+        return SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: lb, a: a, b: b, rbracket: rb))])
+      } else {
+        return i.union(self)
+      }
+    default:
+      return nil
+    }
+  }
+  
+  func isEmpty() -> Bool {
     if self.intvl == .empty {
       return true
     }
@@ -202,4 +202,18 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
       hasher.combine(intvl)
   }
   
+}
+
+
+extension Interval where K: Countable {
+  func union(_ i: Interval) -> SetIntervals<K>? {
+    if let res = self.unionCore(i) {
+      return canonized(res)
+    }
+    return nil
+  }
+  
+  func canonized(_ i: SetIntervals<K>) -> SetIntervals<K> {
+    return i
+  }
 }

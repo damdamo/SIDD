@@ -26,6 +26,10 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
     self.setIntervals = cond ? setIntervals : nil
   }
   
+//  public func union(s: SetIntervals) -> SetIntervals {
+//    
+//  }
+  
   public func hash(into hasher: inout Hasher) {
       hasher.combine(setIntervals)
   }
