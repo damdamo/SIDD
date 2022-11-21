@@ -33,6 +33,16 @@ final class IntervalTests: XCTestCase {
     
   }
   
+  func testCanonisation() {
+    var i = Interval(intvl: .intvl(lbracket: .e, a: 1, b: 3, rbracket: .e))
+    var expectedResult = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 2, rbracket: .i))
+    XCTAssertEqual(i.canonized(), expectedResult)
+    
+    i = Interval(intvl: .intvl(lbracket: .e, a: 1, b: 3, rbracket: .i))
+    expectedResult = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 3, rbracket: .i))
+    XCTAssertEqual(i.canonized(), expectedResult)
+  }
+  
   func testIntersection() {
     
     // [1,2] ∩ [2,5] = [2,2]
