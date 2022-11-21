@@ -40,18 +40,66 @@ final class SetIntervalsTests: XCTestCase {
     XCTAssertEqual(s1.union(s3), expectedRes)    
   }
   
+  func testIntersectionBasic() {
+    let i1: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 5, rbracket: .i))
+    let i2: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 10, b: 20, rbracket: .i))
+    
+    // {[1,5]} ∩ {(10,15]} = Ø
+    // {(10,15]} ∩ {[1,5]} = Ø
+    let s1 = SetIntervals(setIntervals: [i1])
+    let s2 = SetIntervals(setIntervals: [i2])
+    let emptySetIntervals = SetIntervals<Int>(setIntervals: [])
+    XCTAssertEqual(s1.intersection(s2), emptySetIntervals)
+    XCTAssertEqual(s2.intersection(s1), emptySetIntervals)
+
+    // {[5,15]} ∩ {(10,15]} = {[10,15]}
+    let i3: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 5, b: 15, rbracket: .i))
+    let i4: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 10, b: 15, rbracket: .i))
+    let s3 = SetIntervals(setIntervals: [i3])
+    var expectedRes = SetIntervals(setIntervals: [i4])
+    XCTAssertEqual(s2.intersection(s3), expectedRes)
+
+    // {[1,5], [10,15]} ∩ {(4,13]} = {(4,5], [10,13]}
+    let i5: Interval<Int> = Interval(intvl: .intvl(lbracket: .e, a: 4, b: 13, rbracket: .i))
+    let i6: Interval<Int> = Interval(intvl: .intvl(lbracket: .e, a: 4, b: 5, rbracket: .i))
+    let i7: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 10, b: 13, rbracket: .i))
+    let s4 = SetIntervals(setIntervals: [i1, i4])
+    let s5 = SetIntervals(setIntervals: [i5])
+    expectedRes = SetIntervals(setIntervals: [i6, i7])
+    XCTAssertEqual(s4.intersection(s5), expectedRes)
+  }
+  
   func testUnionComplete() {
-    // {[3,15], (15,35]} ∪ {[1,5], [10,20], [30,42]}   = {[1,42]}
+    // {[3,15], [16,35]} ∪ {[1,5], [10,20], [30,42]}   = {[1,42]}
     let i1: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 5, rbracket: .i))
     let i2: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 10, b: 20, rbracket: .i))
     let i3: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 30, b: 42, rbracket: .i))
     let i4: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 3, b: 15, rbracket: .i))
-    let i5: Interval<Int> = Interval(intvl: .intvl(lbracket: .e, a: 15, b: 35, rbracket: .i))
+    let i5: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 16, b: 35, rbracket: .i))
     let expectedRes = SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: .i, a: 1, b: 42, rbracket: .i))])
     
     let s1 = SetIntervals(setIntervals: [i4, i5])
     let s2 = SetIntervals(setIntervals: [i1, i2, i3])
     XCTAssertEqual(s1.union(s2), expectedRes)
+  }
+  
+  func testIntersectionComplete() {
+    // {[3,15], (16,35]} ∩ {[1,5], [10,20], [30,42]}   = {[3,5], [10,15], (16,20] [30,35]}
+    let i1: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 5, rbracket: .i))
+    let i2: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 10, b: 20, rbracket: .i))
+    let i3: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 30, b: 42, rbracket: .i))
+    let i4: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 3, b: 15, rbracket: .i))
+    let i5: Interval<Int> = Interval(intvl: .intvl(lbracket: .e, a: 16, b: 35, rbracket: .i))
+    
+    let i6: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 3, b: 5, rbracket: .i))
+    let i7: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 10, b: 15, rbracket: .i))
+    let i8: Interval<Int> = Interval(intvl: .intvl(lbracket: .e, a: 16, b: 20, rbracket: .i))
+    let i9: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 30, b: 35, rbracket: .i))
+    let expectedRes = SetIntervals(setIntervals: [i6, i7, i8, i9])
+    
+    let s1 = SetIntervals(setIntervals: [i4, i5])
+    let s2 = SetIntervals(setIntervals: [i1, i2, i3])
+    XCTAssertEqual(s1.intersection(s2), expectedRes)
   }
   
 //  func testIntersection() {
