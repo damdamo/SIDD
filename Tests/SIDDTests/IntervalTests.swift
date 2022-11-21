@@ -148,6 +148,45 @@ final class IntervalTests: XCTestCase {
     expectedRes = SetIntervals(setIntervals: [i1,i2])
     XCTAssertEqual(i1.union(i2), expectedRes)
   }
+  
+  func testDifference() {
+    // Ø \ [2,5] = []
+    // [2,5] \ Ø = {[2,5]}
+    var i1: Interval<Int> = Interval(intvl: .empty)
+    var i2: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 5, rbracket: .i))
+    XCTAssertEqual(i1.difference(i2), SetIntervals(setIntervals: [i1]))
+    XCTAssertEqual(i2.difference(i1), SetIntervals(setIntervals: [i2]))
+    
+    // [1,6] \ (6,8] = {[6,8]}
+    i1 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 6, rbracket: .i))
+    i2 = Interval(intvl: .intvl(lbracket: .e, a: 6, b: 8, rbracket: .i))
+    var expectedRes = SetIntervals(setIntervals: [i1])
+    XCTAssertEqual(i1.difference(i2), expectedRes)
+    
+    // [1,10] \ (6,12] = {[1,6]}
+    i1 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 10, rbracket: .i))
+    i2 = Interval(intvl: .intvl(lbracket: .e, a: 6, b: 12, rbracket: .i))
+    expectedRes = SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: .i, a: 1, b: 6, rbracket: .i))])
+    XCTAssertEqual(i1.difference(i2), expectedRes)
+    
+    // [1,20] \ (6,12] = {[1,6], (12,20]}
+    i1 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 20, rbracket: .i))
+    i2 = Interval(intvl: .intvl(lbracket: .e, a: 6, b: 12, rbracket: .i))
+    expectedRes = SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: .i, a: 1, b: 6, rbracket: .i)), Interval(intvl: .intvl(lbracket: .e, a: 12, b: 20, rbracket: .i))])
+    XCTAssertEqual(i1.difference(i2), expectedRes)
+    
+    // [10,20] \ (6,15] = {(15,20]}
+    i1 = Interval(intvl: .intvl(lbracket: .i, a: 10, b: 20, rbracket: .i))
+    i2 = Interval(intvl: .intvl(lbracket: .e, a: 6, b: 15, rbracket: .i))
+    expectedRes = SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: .e, a: 15, b: 20, rbracket: .i))])
+    XCTAssertEqual(i1.difference(i2), expectedRes)
+    
+    // [1,10] \ (0,11) = {[]}
+    i1 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 10, rbracket: .i))
+    i2 = Interval(intvl: .intvl(lbracket: .e, a: 0, b: 11, rbracket: .e))
+    expectedRes = SetIntervals(setIntervals: [])
+    XCTAssertEqual(i1.difference(i2), expectedRes)
+  }
 
   
 }

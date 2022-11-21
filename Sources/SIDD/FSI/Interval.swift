@@ -107,9 +107,17 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
   /// Union between two intervals
   /// - Parameters:
   ///   - i:  Interval to merge
-  /// - Returns: The result of the union, that is a set of intervals
+  /// - Returns: The result of the union, which is a set of intervals
   func union(_ i: Interval) -> SetIntervals<K>? {
     return self.unionCore(i)
+  }
+  
+  /// Difference between two intervals
+  /// - Parameters:
+  ///   - i:  Interval to subtract
+  /// - Returns: The result of the subtraction, which is a set of intervals
+  func difference(_ i: Interval) -> SetIntervals<K>? {
+    return self.differenceCore(i)
   }
   
   /// Union logic of two intervals
@@ -153,6 +161,68 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
     default:
       return nil
     }
+  }
+  
+  /// Difference logic of two intervals
+  private func differenceCore(_ i: Interval) -> SetIntervals<K>? {
+
+    if self == i {
+      return SetIntervals(setIntervals: [Interval(intvl: .empty)])
+    }
+    
+    switch (self.intvl, i.intvl) {
+    case (_, .empty):
+      return SetIntervals(setIntervals: [self])
+    case (.empty, _):
+      return SetIntervals(setIntervals: [self])
+    case (.intvl(let l1, let a, let b, let r1), .intvl(let l2, let c, let d, let r2)):
+      if let r = self.intersection(i)?.isEmpty() {
+        if r == true {
+          return SetIntervals(setIntervals: [self])
+        }
+      }
+      var lb: Lbracket
+      var rb: Rbracket
+      if a < c && b > c && b <= d {
+        switch l2 {
+        case .i:
+          rb = .e
+        case .e:
+          rb = .i
+        }
+        lb = l1
+        return SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: lb, a: a, b: c, rbracket: rb))])
+      } else if a < c && b > d {
+        switch l2 {
+        case .i:
+          rb = .e
+        case .e:
+          rb = .i
+        }
+        switch r2 {
+        case .i:
+          lb = .e
+        case .e:
+          lb = .i
+        }
+        return SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: l1, a: a, b: c, rbracket: rb)), Interval(intvl: .intvl(lbracket: lb, a: d, b: b, rbracket: r1))])
+      } else if a >= c && d >= a && b > d {
+        switch r2 {
+        case .i:
+          lb = .e
+        case .e:
+          lb = .i
+        }
+        rb = r1
+        return SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: lb, a: d, b: b, rbracket: rb))])
+      } else {
+        return SetIntervals(setIntervals: [])
+      }
+      
+    default:
+      return nil
+    }
+    
   }
   
   func isEmpty() -> Bool {
@@ -214,6 +284,26 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
       return .i
     }
   }
+  
+  /// Switch [ by ( and [ by (
+  static func switchLeftParenthesis(l: Lbracket) -> Lbracket {
+    switch l {
+    case .i:
+      return .e
+    case .e:
+      return .i
+    }
+  }
+  
+  /// Switch ] by ) and ) by ]
+  static func switchRightParenthesis(r: Rbracket) -> Rbracket {
+    switch r {
+    case .i:
+      return .e
+    case .e:
+      return .i
+    }
+  }
 
   public func hash(into hasher: inout Hasher) {
       hasher.combine(intvl)
@@ -225,6 +315,13 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
 extension Interval where K: Countable {
   func union(_ i: Interval) -> SetIntervals<K>? {
     if let res = self.unionCore(i) {
+      return canonized(res)
+    }
+    return nil
+  }
+  
+  func difference(_ i: Interval) -> SetIntervals<K>? {
+    if let res = self.differenceCore(i) {
       return canonized(res)
     }
     return nil
