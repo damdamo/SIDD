@@ -82,6 +82,11 @@ final class IntervalTests: XCTestCase {
     i1 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 2, rbracket: .e))
     i2 = Interval(intvl: .intvl(lbracket: .e, a: 2, b: 5, rbracket: .i))
     XCTAssertEqual(i1.intersection(i2), expectedRes)
+    
+    // (10,20] ∩ [16,20] = []
+    i1 = Interval(intvl: .intvl(lbracket: .e, a: 10, b: 20, rbracket: .i))
+    i2 = Interval(intvl: .intvl(lbracket: .i, a: 16, b: 20, rbracket: .i))
+    XCTAssertEqual(i1.intersection(i2), i2)
   }
   
   func testUnion() {

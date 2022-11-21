@@ -63,22 +63,40 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
     case (.empty, _):
       return self
     case (.intvl(let l1, let a, let b, let r1), .intvl(let l2, let c, let d, let r2)):
+      var lbracket: Lbracket
+      var rbracket: Rbracket
       if b < c {
         return Interval(intvl: .empty)
       } else if a <= c && b >= c && b <= d {
         k1 = c
         k2 = b
+        if a == c {
+          lbracket = Interval<K>.strongLeftExclusion(l1: l1, l2: l2)
+        } else {
+          lbracket = l2
+        }
+        if b == d {
+          rbracket = Interval<K>.strongRightExclusion(r1: r1, r2: r2)
+        } else {
+          rbracket = r1
+        }
       } else if a <= c && b > d {
         k1 = c
         k2 = d
+        if a == c {
+          lbracket = Interval<K>.strongLeftExclusion(l1: l1, l2: l2)
+        } else {
+          lbracket = l2
+        }
+        rbracket = r2
       } else {
         return i.intersection(self)
       }
       return Interval(intvl: .intvl(
-        lbracket: Interval<K>.strongLeftExclusion(l1: l1, l2: l2),
+        lbracket: lbracket,
         a: k1,
         b: k2,
-        rbracket: Interval<K>.strongRightExclusion(r1: r1, r2: r2))
+        rbracket: rbracket)
       )
     default:
       return nil
