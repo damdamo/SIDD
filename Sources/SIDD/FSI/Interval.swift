@@ -97,18 +97,17 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
   /// Union logic of two intervals
   private func unionCore(_ i: Interval) -> SetIntervals<K>? {
 
-    if let r = self.intersection(i)?.isEmpty() {
-      if r == true {
-        return SetIntervals(setIntervals: [self,i])
-      }
-    }
-
     switch (self.intvl, i.intvl) {
     case (_, .empty):
       return SetIntervals(setIntervals: [self])
     case (.empty, _):
       return SetIntervals(setIntervals: [i])
     case (.intvl(let l1, let a, let b, let r1), .intvl(let l2, let c, let d, let r2)):
+      if let r = self.intersection(i)?.isEmpty() {
+        if r == true {
+          return SetIntervals(setIntervals: [self,i])
+        }
+      }
       var lb: Lbracket
       var rb: Rbracket
       if a <= c && b >= c && b < d {
