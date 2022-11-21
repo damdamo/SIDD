@@ -183,7 +183,7 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
       }
       var lb: Lbracket
       var rb: Rbracket
-      if a < c && b > c && b <= d {
+      if a < c && b >= c && b <= d {
         switch l2 {
         case .i:
           rb = .e

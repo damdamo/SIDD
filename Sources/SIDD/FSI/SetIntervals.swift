@@ -44,6 +44,15 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
     return self.unionCore(s)
   }
   
+  /// Addition of an interval with a set of intervals.
+  /// A particular case from the union between two sets of intervals.
+  /// - Parameters:
+  ///   - i:  The interval to add
+  /// - Returns: The result of the addition
+  func add(_ i: Interval<K>) -> SetIntervals? {
+    return self.unionCore(SetIntervals(setIntervals: [i]))
+  }
+  
   /// Intersection between two sets of intervals.
   /// E.g.: {[1,5], [10,15]} ∩ {[4,13]} = {[4,5], [10,13]}
   /// - Parameters:
@@ -60,6 +69,15 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
   /// - Returns: The result of the difference
   func difference(_ s: SetIntervals) -> SetIntervals? {
     return self.differenceCore(s)
+  }
+  
+  /// Subtract an interval from a set of intervals.
+  /// A particular case from the difference between two sets of intervals.
+  /// - Parameters:
+  ///   - i:  The interval to subtract
+  /// - Returns: The result of the subtraction
+  func sub(_ i: Interval<K>) -> SetIntervals? {
+    return self.difference(SetIntervals(setIntervals: [i]))
   }
   
   /// Union between two sets of intervals
@@ -195,6 +213,8 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
     
   }
   
+  
+  
   public func hash(into hasher: inout Hasher) {
       hasher.combine(setIntervals)
   }
@@ -203,6 +223,11 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
 
 
 extension SetIntervals where K: Countable {
+  
+  /// Union between two sets of intervals
+  /// - Parameters:
+  ///   - s:  Set of intervals to merge
+  /// - Returns: The result of the union
   func union(_ s: SetIntervals) -> SetIntervals<K>? {
     if let res = self.unionCore(s) {
       return canonized(res)
@@ -210,6 +235,23 @@ extension SetIntervals where K: Countable {
     return nil
   }
   
+  /// Addition of an interval with a set of intervals.
+  /// A particular case from the union between two sets of intervals.
+  /// - Parameters:
+  ///   - i:  The interval to add
+  /// - Returns: The result of the addition
+  func add(_ i: Interval<K>) -> SetIntervals? {
+    if let res = self.unionCore(SetIntervals(setIntervals: [i])) {
+      return canonized(res)
+    }
+    return nil
+  }
+  
+  /// Intersection between two sets of intervals.
+  /// E.g.: {[1,5], [10,15]} ∩ {[4,13]} = {[4,5], [10,13]}
+  /// - Parameters:
+  ///   - s:  Set of intervals to intersect
+  /// - Returns: The result of the intersection
   func intersection(_ s: SetIntervals) -> SetIntervals<K>? {
     if let res = self.intersectionCore(s) {
       return canonized(res)
@@ -217,12 +259,27 @@ extension SetIntervals where K: Countable {
     return nil
   }
   
+  /// Difference between two sets of intervals.
+  /// E.g.: {[1,5], [10,15]} \ {[4,13]} = {[1,4), (13,15]}
+  /// - Parameters:
+  ///   - s:  Set of intervals to subtract
+  /// - Returns: The result of the difference
   func difference(_ s: SetIntervals) -> SetIntervals<K>? {
     if let res = self.differenceCore(s) {
       return canonized(res)
     }
     return nil
   }
+  
+  /// Subtract an interval from a set of intervals.
+  /// A particular case from the difference between two sets of intervals.
+  /// - Parameters:
+  ///   - i:  The interval to subtract
+  /// - Returns: The result of the subtraction
+  func sub(_ i: Interval<K>) -> SetIntervals? {
+    return self.difference(SetIntervals(setIntervals: [i]))
+  }
+  
   
   // TODO: To complete
   func canonized(_ i: SetIntervals<K>) -> SetIntervals<K> {
