@@ -113,7 +113,6 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
       if let s1 = s1p, let s2 = s2p {
         // Construct a dictionnary where the key is an interval from the left, and values are all the intervals (from right set) related to this key. However, once a value is added for a key, it is removed from s2NotShared. Thus, the same right interval cannot be related to different left intervals.
         var dicShareIntervals: [Interval<K>: Set<Interval<K>>] = [:]
-//        var s2NotShared = s2
         for i1 in s1 {
           dicShareIntervals[i1] = []
           for i2 in s2 {
@@ -161,6 +160,7 @@ extension SetIntervals where K: Countable {
     return nil
   }
   
+  // TODO: To complete
   func canonized(_ i: SetIntervals<K>) -> SetIntervals<K> {
     return i
   }
