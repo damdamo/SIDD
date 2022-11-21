@@ -107,13 +107,6 @@ final class IntervalTests: XCTestCase {
     var expectedRes: SetIntervals<Int> = SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: .i, a: 1, b: 5, rbracket: .i))])
 //    var expectedRes: Interval<Int> = Interval(intvl:.intvl(lbracket: .i, a: 1, b: 5, rbracket: .i))
     XCTAssertEqual(i1.union(i2), expectedRes)
-    
-    // TODO The test does not pass for now, need the canonicity for countable sets !
-    // [1,1] ∪ [2,5] = {[1,5]}
-    i1 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 1, rbracket: .i))
-    i2 = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 5, rbracket: .i))
-    expectedRes = SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: .i, a: 1, b: 5, rbracket: .i))])
-    XCTAssertEqual(i1.union(i2), expectedRes)
 
     // [1,10] ∪ Ø = {[1,10]}
     i1 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 10, rbracket: .i))

@@ -155,7 +155,20 @@ final class SetIntervalsTests: XCTestCase {
     let s2 = SetIntervals(setIntervals: [i2])
     XCTAssertEqual(s1.difference(s2), expectedRes)
     
+  }
+  
+  func testCanonized() {
+    // [1,1] ∪ [2,5] = {[1,5]}
+    let i1 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 1, rbracket: .i))
+    let i2 = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 5, rbracket: .i))
+    let s1 = SetIntervals(setIntervals: [i1,i2])
+    var expectedRes = SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: .i, a: 1, b: 5, rbracket: .i))])
+    XCTAssertEqual(s1.canonized(), expectedRes)
     
+    let i3 = Interval(intvl: .intvl(lbracket: .i, a: 4, b: 10, rbracket: .i))
+    let s2 = SetIntervals(setIntervals: [i1,i2,i3])
+    expectedRes = SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: .i, a: 1, b: 10, rbracket: .i))])
+    XCTAssertEqual(s2.canonized(), expectedRes)
   }
   
 }
