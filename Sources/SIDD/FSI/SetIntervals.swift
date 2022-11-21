@@ -53,6 +53,15 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
     return self.intersectionCore(s)
   }
   
+  /// Difference between two sets of intervals.
+  /// E.g.: {[1,5], [10,15]} \ {[4,13]} = {[1,4), (13,15]}
+  /// - Parameters:
+  ///   - s:  Set of intervals to subtract
+  /// - Returns: The result of the difference
+  func difference(_ s: SetIntervals) -> SetIntervals? {
+    return self.differenceCore(s)
+  }
+  
   /// Union between two sets of intervals
   private func unionCore(_ s: SetIntervals) -> SetIntervals? {
     
@@ -138,6 +147,54 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
     
   }
   
+  /// Difference between two sets of intervals
+  private func differenceCore(_ s: SetIntervals) -> SetIntervals? {
+    
+    if self == s {
+      return SetIntervals(setIntervals: [])
+    }
+    
+    switch (self.setIntervals, s.setIntervals) {
+    case ([], _):
+      return self
+    case (_, []):
+      return self
+    case (let s1p, let s2p):
+      if let s1 = s1p, let s2 = s2p {
+        // Construct a dictionnary where the key is an interval from the left, and values are all the intervals (from right set) related to this key. However, once a value is added for a key, it is removed from s2NotShared. Thus, the same right interval cannot be related to different left intervals.
+        var dicShareIntervals: [Interval<K>: Set<Interval<K>>] = [:]
+        for i1 in s1 {
+          dicShareIntervals[i1] = []
+          for i2 in s2 {
+            if !i1.intersection(i2)!.isEmpty() {
+              dicShareIntervals[i1]!.insert(i2)
+            }
+          }
+        }
+
+        // Apply the difference between the key and all of its values
+        var set: Set<Interval<K>>
+        var mergeIntervals: SetIntervals = SetIntervals(setIntervals: [])
+        for (key, intervals) in dicShareIntervals {
+          // For a key, we have to subtract all intervals of the set "intervals".
+          // We take the first one (no matter which one) and we apply the difference on key
+          // Then, the result is a set of intervals, so we reapply the set difference on this new result
+          if let interval = intervals.first {
+            set = intervals
+            set.remove(interval)
+            mergeIntervals = mergeIntervals.union(key.difference(interval)!.difference(SetIntervals(setIntervals: set))!)!
+          } else {
+            mergeIntervals = mergeIntervals.union(SetIntervals(setIntervals: [key]))!
+          }
+        }
+        return mergeIntervals
+      } else {
+        return nil
+      }
+    }
+    
+  }
+  
   public func hash(into hasher: inout Hasher) {
       hasher.combine(setIntervals)
   }
@@ -155,6 +212,13 @@ extension SetIntervals where K: Countable {
   
   func intersection(_ s: SetIntervals) -> SetIntervals<K>? {
     if let res = self.intersectionCore(s) {
+      return canonized(res)
+    }
+    return nil
+  }
+  
+  func difference(_ s: SetIntervals) -> SetIntervals<K>? {
+    if let res = self.differenceCore(s) {
       return canonized(res)
     }
     return nil
