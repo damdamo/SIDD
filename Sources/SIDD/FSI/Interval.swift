@@ -109,20 +109,6 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
   ///   - i:  Interval to merge
   /// - Returns: The result of the union, which is a set of intervals
   func union(_ i: Interval) -> SetIntervals<K>? {
-    return self.unionCore(i)
-  }
-  
-  /// Difference between two intervals
-  /// - Parameters:
-  ///   - i:  Interval to subtract
-  /// - Returns: The result of the subtraction, which is a set of intervals
-  func difference(_ i: Interval) -> SetIntervals<K>? {
-    return self.differenceCore(i)
-  }
-  
-  /// Union logic of two intervals
-  private func unionCore(_ i: Interval) -> SetIntervals<K>? {
-
     switch (self.intvl, i.intvl) {
     case (_, .empty):
       return SetIntervals(setIntervals: [self])
@@ -163,9 +149,11 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
     }
   }
   
-  /// Difference logic of two intervals
-  private func differenceCore(_ i: Interval) -> SetIntervals<K>? {
-
+  /// Difference between two intervals
+  /// - Parameters:
+  ///   - i:  Interval to subtract
+  /// - Returns: The result of the subtraction, which is a set of intervals
+  func difference(_ i: Interval) -> SetIntervals<K>? {
     if self == i {
       return SetIntervals(setIntervals: [Interval(intvl: .empty)])
     }
@@ -222,9 +210,9 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
     default:
       return nil
     }
-    
   }
   
+  /// Return if the interval is the empty interval
   func isEmpty() -> Bool {
     if self.intvl == .empty {
       return true
@@ -314,7 +302,9 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
 
 extension Interval where K: Countable {
 
-  // Canonisation of an interval is an interval of the form [a,b]
+  /// Canonization of an interval, to get only square brackets. Intervals of the form (a,b), [a,b) and (a,b] can be rewritten into a [a',b'] form.
+  /// For instance, (a,b) = [next(a), pre(b)]
+  /// - Returns: The canonized interval
   func canonized() -> Interval? {
     switch self.intvl {
     case .empty:

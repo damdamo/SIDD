@@ -41,48 +41,6 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
   ///   - s:  Set of intervals to merge
   /// - Returns: The result of the union
   func union(_ s: SetIntervals) -> SetIntervals? {
-    return self.unionCore(s)
-  }
-  
-  /// Addition of an interval with a set of intervals.
-  /// A particular case from the union between two sets of intervals.
-  /// - Parameters:
-  ///   - i:  The interval to add
-  /// - Returns: The result of the addition
-  func add(_ i: Interval<K>) -> SetIntervals? {
-    return self.unionCore(SetIntervals(setIntervals: [i]))
-  }
-  
-  /// Intersection between two sets of intervals.
-  /// E.g.: {[1,5], [10,15]} ∩ {[4,13]} = {[4,5], [10,13]}
-  /// - Parameters:
-  ///   - s:  Set of intervals to intersect
-  /// - Returns: The result of the intersection
-  func intersection(_ s: SetIntervals) -> SetIntervals? {
-    return self.intersectionCore(s)
-  }
-  
-  /// Difference between two sets of intervals.
-  /// E.g.: {[1,5], [10,15]} \ {[4,13]} = {[1,4), (13,15]}
-  /// - Parameters:
-  ///   - s:  Set of intervals to subtract
-  /// - Returns: The result of the difference
-  func difference(_ s: SetIntervals) -> SetIntervals? {
-    return self.differenceCore(s)
-  }
-  
-  /// Subtract an interval from a set of intervals.
-  /// A particular case from the difference between two sets of intervals.
-  /// - Parameters:
-  ///   - i:  The interval to subtract
-  /// - Returns: The result of the subtraction
-  func sub(_ i: Interval<K>) -> SetIntervals? {
-    return self.difference(SetIntervals(setIntervals: [i]))
-  }
-  
-  /// Union between two sets of intervals
-  private func unionCore(_ s: SetIntervals) -> SetIntervals? {
-    
     switch (self.setIntervals, s.setIntervals) {
     case ([], _):
       return s
@@ -117,20 +75,30 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
         // Merge all got intervals from mergeIntervals
         var unionMergeIntervals: SetIntervals = SetIntervals(setIntervals: [])
         for i in mergeIntervals {
-          unionMergeIntervals = unionMergeIntervals.unionCore(SetIntervals(setIntervals: [i]))!
+          unionMergeIntervals = unionMergeIntervals.union(SetIntervals(setIntervals: [i]))!
         }
                 
         return SetIntervals(setIntervals: s2NotShared.union(unionMergeIntervals.setIntervals!))
       } else {
         return nil
       }
-    }
-    
+    }  }
+  
+  /// Addition of an interval with a set of intervals.
+  /// A particular case from the union between two sets of intervals.
+  /// - Parameters:
+  ///   - i:  The interval to add
+  /// - Returns: The result of the addition
+  func add(_ i: Interval<K>) -> SetIntervals? {
+    return self.union(SetIntervals(setIntervals: [i]))
   }
   
-  /// Intersection between two sets of intervals
-  private func intersectionCore(_ s: SetIntervals) -> SetIntervals? {
-    
+  /// Intersection between two sets of intervals.
+  /// E.g.: {[1,5], [10,15]} ∩ {[4,13]} = {[4,5], [10,13]}
+  /// - Parameters:
+  ///   - s:  Set of intervals to intersect
+  /// - Returns: The result of the intersection
+  func intersection(_ s: SetIntervals) -> SetIntervals? {
     switch (self.setIntervals, s.setIntervals) {
     case ([], _):
       return self
@@ -161,13 +129,14 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
       } else {
         return nil
       }
-    }
-    
-  }
+    }  }
   
-  /// Difference between two sets of intervals
-  private func differenceCore(_ s: SetIntervals) -> SetIntervals? {
-    
+  /// Difference between two sets of intervals.
+  /// E.g.: {[1,5], [10,15]} \ {[4,13]} = {[1,4), (13,15]}
+  /// - Parameters:
+  ///   - s:  Set of intervals to subtract
+  /// - Returns: The result of the difference
+  func difference(_ s: SetIntervals) -> SetIntervals? {
     if self == s {
       return SetIntervals(setIntervals: [])
     }
@@ -210,10 +179,16 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
         return nil
       }
     }
-    
   }
   
-  
+  /// Subtract an interval from a set of intervals.
+  /// A particular case from the difference between two sets of intervals.
+  /// - Parameters:
+  ///   - i:  The interval to subtract
+  /// - Returns: The result of the subtraction
+  func sub(_ i: Interval<K>) -> SetIntervals? {
+    return self.difference(SetIntervals(setIntervals: [i]))
+  }
   
   public func hash(into hasher: inout Hasher) {
       hasher.combine(setIntervals)
@@ -224,6 +199,9 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
 
 extension SetIntervals where K: Countable {
   
+  /// Canonized a set of intervals for countable ones. The goal is to avoid sets of interval of the form: {[a,b], [next(b), c]} = {[a,c]}
+  /// - Parameter canonizedIntervals: A condition to avoid to re canonize the intervals multiple times. False by default, to apply the canonization a single time.
+  /// - Returns:The canonized set of intervals
   func canonized(canonizedIntervals: Bool = false) -> SetIntervals<K>? {
     
     if self.setIntervals == [] {
@@ -248,15 +226,15 @@ extension SetIntervals where K: Countable {
           switch i.intvl {
           case .intvl(lbracket: let lb2, a: let a2, b: let b2, rbracket: let rb2):
             if rb1 == .i && lb2 == .i && b1.next() as! K == a2 {
-              newSetIntervals = newSetIntervals.unionCore(
+              newSetIntervals = newSetIntervals.union(
                 SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: lb1, a: a1, b: b2, rbracket: rb2))])
               )!
-              return newSetIntervals.unionCore(s.sub(i)!)!.canonized(canonizedIntervals: true)
+              return newSetIntervals.union(s.sub(i)!)!.canonized(canonizedIntervals: true)
             } else if lb1 == .i && rb2 == .i && a1 == b2.next() as! K {
-              newSetIntervals = newSetIntervals.unionCore(
+              newSetIntervals = newSetIntervals.union(
                 SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: lb2, a: a2, b: b1, rbracket: rb1))])
               )!
-              return newSetIntervals.unionCore(s.sub(i)!)!.canonized(canonizedIntervals: true)
+              return newSetIntervals.union(s.sub(i)!)!.canonized(canonizedIntervals: true)
             }
           default:
             continue
