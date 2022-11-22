@@ -165,7 +165,7 @@ final class SetIntervalsTests: XCTestCase {
     var expectedRes = SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: .i, a: 1, b: 5, rbracket: .i))])
     XCTAssertEqual(s1.canonized(), expectedRes)
     
-    let i3 = Interval(intvl: .intvl(lbracket: .i, a: 4, b: 10, rbracket: .i))
+    let i3 = Interval(intvl: .intvl(lbracket: .i, a: 6, b: 10, rbracket: .i))
     let s2 = SetIntervals(setIntervals: [i1,i2,i3])
     expectedRes = SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: .i, a: 1, b: 10, rbracket: .i))])
     XCTAssertEqual(s2.canonized(), expectedRes)

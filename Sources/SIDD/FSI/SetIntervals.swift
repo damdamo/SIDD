@@ -310,12 +310,12 @@ extension SetIntervals where K: Countable {
               newSetIntervals = newSetIntervals.unionCore(
                 SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: lb1, a: a1, b: b2, rbracket: rb2))])
               )!
-              return newSetIntervals.unionCore(s.sub(i)!.canonized(canonizedIntervals: true)!)
+              return newSetIntervals.unionCore(s.sub(i)!)!.canonized(canonizedIntervals: true)
             } else if lb1 == .i && rb2 == .i && a1 == b2.next() as! K {
               newSetIntervals = newSetIntervals.unionCore(
                 SetIntervals(setIntervals: [Interval(intvl: .intvl(lbracket: lb2, a: a2, b: b1, rbracket: rb1))])
               )!
-              return newSetIntervals.unionCore(s.sub(i)!.canonized(canonizedIntervals: true)!)
+              return newSetIntervals.unionCore(s.sub(i)!)!.canonized(canonizedIntervals: true)
             }
           default:
             continue
