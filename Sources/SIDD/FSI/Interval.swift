@@ -313,20 +313,7 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
 
 
 extension Interval where K: Countable {
-//  func union(_ i: Interval) -> SetIntervals<K>? {
-//    if let res = self.unionCore(i) {
-//      return res.canonized()
-//    }
-//    return nil
-//  }
-//  
-//  func difference(_ i: Interval) -> SetIntervals<K>? {
-//    if let res = self.differenceCore(i) {
-//      return res.canonized()
-//    }
-//    return nil
-//  }
-  
+
   // Canonisation of an interval is an interval of the form [a,b]
   func canonized() -> Interval? {
     switch self.intvl {
@@ -354,4 +341,5 @@ extension Interval where K: Countable {
       return nil
     }
   }
+  
 }
