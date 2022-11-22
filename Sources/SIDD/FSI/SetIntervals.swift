@@ -1,3 +1,4 @@
+/// A structure that contains a set of intervals with additional constraints and operations to work on these intervals.
 public struct SetIntervals<K: Comparable & Hashable>: Hashable {
   
   // Set of intervals

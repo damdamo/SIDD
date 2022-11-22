@@ -1,4 +1,6 @@
 /// Definition of an interval
+/// An interval is either empty or a composition of two bound values and two bound symbols to include or exclude the bound value.
+/// It could be visualized as: [a,b], [a,b), (a,b], (a,b)
 public struct Interval <K: Comparable & Hashable>: Hashable {  
   
   let intvl: Intvl<K>?
