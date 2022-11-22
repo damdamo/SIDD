@@ -212,6 +212,45 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
     }
   }
   
+  /// Filter "lesser than" a value k. It keeps only values that are lower than a key.
+  /// - Parameter k: The bound limit
+  /// - Returns: The filtered interval
+  func filterLt(k: K) -> Interval? {
+    switch self.intvl {
+    case .empty:
+      return self
+    case .intvl(lbracket: let lb, a: let a, b: let b, rbracket: _):
+      if k <= a {
+        return Interval(intvl: .empty)
+      } else if k > a && k <= b {
+        return Interval(intvl: .intvl(lbracket: lb, a: a, b: k, rbracket: .e))
+      } else {
+        return self
+      }
+    default:
+      return nil
+    }
+  }
+  
+  /// Filter "greater than or equal" a value k. It keeps only values that are greater or equal than a key.
+  /// - Parameter k: The bound limit
+  /// - Returns: The filtered interval
+  func filterGeq(k: K) -> Interval? {
+    switch self.intvl {
+    case .empty:
+      return self
+    case .intvl(lbracket: _, a: let a, b: let b, rbracket: let rb):
+      if k <= a {
+        return self
+      } else if k > a && k <= b {
+        return Interval(intvl: .intvl(lbracket: .i, a: k, b: b, rbracket: rb))
+      } else {
+        return Interval(intvl: .empty)
+      }
+    default:
+      return nil
+    }
+  }
   
   /// Return whether an interval is included in another one
   /// - Parameter i: The interval that contains or not self
@@ -220,7 +259,9 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
     return (self.intersection(i) == self)
   }
   
+  
   /// Return if the interval is the empty interval
+  /// - Returns: True if empty, false otherwise
   func isEmpty() -> Bool {
     if self.intvl == .empty {
       return true
