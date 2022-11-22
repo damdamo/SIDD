@@ -195,6 +195,28 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
   }
   
   
+  /// Filter "lesser than" by a value k. It keeps only values that are lower than a key for each interval in a set.
+  /// - Parameter k: The bound limit
+  /// - Returns: The filtered set of intervals
+  func filterLt(k: K) -> SetIntervals? {
+    if let setIntervals = self.setIntervals {
+      let newIntervals: Set<Interval<K>> = Set(setIntervals.map({$0.filterLt(k: k)!}))
+      return SetIntervals(setIntervals: newIntervals)
+    }
+    return nil
+  }
+  
+  /// Filter "greater than or equal" by a value k. It keeps only values that are greater or equal than a key for each interval in a set.
+  /// - Parameter k: The bound limit
+  /// - Returns: The filtered set of intervals
+  func filterGeq(k: K) -> SetIntervals? {
+    if let setIntervals = self.setIntervals {
+      let newIntervals: Set<Interval<K>> = Set(setIntervals.map({$0.filterGeq(k: k)!}))
+      return SetIntervals(setIntervals: newIntervals)
+    }
+    return nil
+  }
+  
   /// Checks if all intervals of the left sets are included in the right set
   /// - Parameter s: The set of intervals to look at
   /// - Returns: True if all intervals are included, false otherwise
