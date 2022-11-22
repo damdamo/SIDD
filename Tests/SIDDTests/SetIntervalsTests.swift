@@ -167,9 +167,9 @@ final class SetIntervalsTests: XCTestCase {
     let s2: SetIntervals<Int> = SetIntervals(setIntervals: [i3])
     
     // filterLt({[]}, 42) = []
-    XCTAssertEqual(emptySet.filterLt(k: 42), emptySet)
+    XCTAssertEqual(emptySet.filterLt(42), emptySet)
     // filterLt({[5,10], [15,20]}, 8) = [5,8)
-    XCTAssertEqual(s1.filterLt(k: 8), s2)
+    XCTAssertEqual(s1.filterLt(8), s2)
   }
   
   func testFilterGeq() {
@@ -182,9 +182,9 @@ final class SetIntervalsTests: XCTestCase {
     let s2: SetIntervals<Int> = SetIntervals(setIntervals: [i3])
     
     // filterGeq({[]}, 42) = []
-    XCTAssertEqual(emptySet.filterGeq(k: 42), emptySet)
+    XCTAssertEqual(emptySet.filterGeq(42), emptySet)
     // filterLt({[5,10], [15,20]}, 18) = [18,20]
-    XCTAssertEqual(s1.filterGeq(k: 18), s2)
+    XCTAssertEqual(s1.filterGeq(18), s2)
   }
   
   func testIsIncludedIn() {

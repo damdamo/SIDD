@@ -199,13 +199,13 @@ final class IntervalTests: XCTestCase {
     let i2: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 6, b: 9, rbracket: .e))
     
     // filterLt(Ø, 3) = Ø
-    XCTAssertEqual(emptyInterval.filterLt(k: 3), emptyInterval)
+    XCTAssertEqual(emptyInterval.filterLt(3), emptyInterval)
     // filterLt([6,12], 9) = [6,9)
-    XCTAssertEqual(i1.filterLt(k: 9), i2)
+    XCTAssertEqual(i1.filterLt(9), i2)
     // filterLt([6,12], 6) = Ø
-    XCTAssertEqual(i1.filterLt(k: 6), emptyInterval)
+    XCTAssertEqual(i1.filterLt(6), emptyInterval)
     // filterLt([6,12], 13) = [6,12]
-    XCTAssertEqual(i1.filterLt(k: 13), i1)
+    XCTAssertEqual(i1.filterLt(13), i1)
   }
   
   func testFilterGeq() {
@@ -216,13 +216,13 @@ final class IntervalTests: XCTestCase {
     let i2: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 9, b: 12, rbracket: .i))
     
     // filterGeq(Ø, 3) = Ø
-    XCTAssertEqual(emptyInterval.filterGeq(k: 3), emptyInterval)
+    XCTAssertEqual(emptyInterval.filterGeq(3), emptyInterval)
     // filterGeq([6,12], 9) = [9,12]
-    XCTAssertEqual(i1.filterGeq(k: 9), i2)
+    XCTAssertEqual(i1.filterGeq(9), i2)
     // filterLt([6,12], 6) = [6,12]
-    XCTAssertEqual(i1.filterGeq(k: 6), i1)
+    XCTAssertEqual(i1.filterGeq(6), i1)
     // filterLt([6,12], 13) = Ø
-    XCTAssertEqual(i1.filterGeq(k: 13), emptyInterval)
+    XCTAssertEqual(i1.filterGeq(13), emptyInterval)
   }
   
   func testIsIncludedIn() {

@@ -217,7 +217,7 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
   /// Filter "lesser than" by a value k. It keeps only values that are lower than a key.
   /// - Parameter k: The bound limit
   /// - Returns: The filtered interval
-  func filterLt(k: K) -> Interval? {
+  func filterLt(_ k: K) -> Interval? {
     switch self.intvl {
     case .empty:
       return self
@@ -237,7 +237,7 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
   /// Filter "greater than or equal" by a value k. It keeps only values that are greater or equal than a key.
   /// - Parameter k: The bound limit
   /// - Returns: The filtered interval
-  func filterGeq(k: K) -> Interval? {
+  func filterGeq(_ k: K) -> Interval? {
     switch self.intvl {
     case .empty:
       return self
