@@ -212,6 +212,14 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
     }
   }
   
+  
+  /// Return whether an interval is included in another one
+  /// - Parameter i: The interval that contains or not self
+  /// - Returns: True if the interval is containeid, false otherwise
+  func isIncludedIn(i: Interval) -> Bool {
+    return (self.intersection(i) == self)
+  }
+  
   /// Return if the interval is the empty interval
   func isEmpty() -> Bool {
     if self.intvl == .empty {

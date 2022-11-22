@@ -194,6 +194,29 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
       hasher.combine(setIntervals)
   }
   
+  
+  /// Checks if all intervals of the left sets are included in the right set
+  /// - Parameter s: The set of intervals to look at
+  /// - Returns: True if all intervals are included, false otherwise
+  func isIncludedIn(_ s: SetIntervals) -> Bool {
+    if let s1 = self.setIntervals, let s2 = s.setIntervals {
+      if s1 == [] {
+        return true
+      } else if s2 == [] {
+        return false
+      }
+      return s1.allSatisfy({(i1: Interval<K>) -> Bool in
+        for i2 in s2 {
+          if i1.isIncludedIn(i: i2) {
+            return true
+          }
+        }
+        return false
+      })
+    }
+    return false
+  }
+  
 }
 
 

@@ -190,6 +190,26 @@ final class IntervalTests: XCTestCase {
     expectedRes = SetIntervals(setIntervals: [])
     XCTAssertEqual(i1.difference(i2), expectedRes)
   }
+  
+  
+  func testIsIncludedIn() {
+    let i1: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 4, b: 10, rbracket: .i))
+    let i2: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 5, rbracket: .i))
+    let i3: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 10, rbracket: .e))
+    let i4: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 10, rbracket: .i))
+    let emptyInterval: Interval<Int> = Interval(intvl: .empty)
+    
+    // Ø ⊆ [4,10] = true
+    XCTAssertTrue(emptyInterval.isIncludedIn(i: i1))
+    // [4,10] ⊆ Ø = false
+    XCTAssertFalse(i1.isIncludedIn(i: emptyInterval))
+    // [4,10] ⊆ [2,5] = false
+    XCTAssertFalse(i1.isIncludedIn(i: i2))
+    // [4,10] ⊆ [2,10) = false
+    XCTAssertFalse(i1.isIncludedIn(i: i3))
+    // [4,10] ⊆ [2,10] = true
+    XCTAssertTrue(i1.isIncludedIn(i: i4))
+  }
 
   
 }

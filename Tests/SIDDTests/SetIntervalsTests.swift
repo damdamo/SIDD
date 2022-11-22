@@ -171,4 +171,35 @@ final class SetIntervalsTests: XCTestCase {
     XCTAssertEqual(s2.canonized(), expectedRes)
   }
   
+  func testIsIncludedIn() {
+    
+    let i1 = Interval(intvl: .intvl(lbracket: .i, a: 4, b: 10, rbracket: .i))
+    let i2 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 20, rbracket: .i))
+    
+    let emptySet: SetIntervals<Int> = SetIntervals(setIntervals: [])
+    var s1: SetIntervals<Int> = SetIntervals(setIntervals: [i1])
+    var s2: SetIntervals<Int> = SetIntervals(setIntervals: [i2])
+    
+    // ({[]} ⊆ {[4,10]}) = true
+    XCTAssertTrue(emptySet.isIncludedIn(s1))
+    // ({[4,10]} ⊆ {[]}) = false
+    XCTAssertFalse(s1.isIncludedIn(emptySet))
+    // ({[4,10]} ⊆ {[1,20]}) = true
+    XCTAssertTrue(s1.isIncludedIn(s2))
+    
+    let i3 = Interval(intvl: .intvl(lbracket: .i, a: 12, b: 15, rbracket: .i))
+    let i4 = Interval(intvl: .intvl(lbracket: .i, a: 32, b: 35, rbracket: .i))
+    let i5 = Interval(intvl: .intvl(lbracket: .i, a: 30, b: 37, rbracket: .i))
+    
+    // ({[4,10], [12,15], [32,35]} ⊆ {[1,20], [30,37]}) = true
+    s1 = SetIntervals(setIntervals: [i1, i3, i4])
+    s2 = SetIntervals(setIntervals: [i2, i5])
+    XCTAssertTrue(s1.isIncludedIn(s2))
+    
+    // ({[4,10], [12,15], [32,35]} ⊆ {[1,20]}) = false
+    s1 = SetIntervals(setIntervals: [i1, i3, i4])
+    s2 = SetIntervals(setIntervals: [i2])
+    XCTAssertFalse(s1.isIncludedIn(s2))
+  }
+  
 }
