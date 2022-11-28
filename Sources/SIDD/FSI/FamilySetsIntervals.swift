@@ -83,6 +83,13 @@ public struct FamilySetsIntervals<K: Comparable & Hashable>: Hashable {
     return nil
   }
   
+  
+  /// Compute the number of element in the family
+  /// - Returns: The number of element in the family
+  func count() -> Int? {
+    return self.familySetsIntervals?.count
+  }
+  
 }
 
 extension FamilySetsIntervals where K: Countable {

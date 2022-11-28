@@ -240,6 +240,12 @@ public struct SetIntervals<K: Comparable & Hashable>: Hashable {
     return false
   }
   
+  /// Compute the number of element in the set
+  /// - Returns: The number of element in the set
+  func count() -> Int? {
+    return self.setIntervals?.count
+  }
+  
 }
 
 
