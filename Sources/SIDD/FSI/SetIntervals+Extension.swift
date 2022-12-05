@@ -1,17 +1,14 @@
 extension SetIntervals: CustomStringConvertible {
   public var description: String {
-    if let set = self.setIntervals {
-      if set == [] {
-        return "[]"
-      }
-      var res: String = "{"
-      for s in set {
-        res.append("\(s), ")
-      }
-      res.removeLast(2)
-      res.append("}")
-      return res
+    if self.setIntervals == [] {
+      return "[]"
     }
-    return "nil"
+    var res: String = "{"
+    for s in self.setIntervals {
+      res.append("\(s), ")
+    }
+    res.removeLast(2)
+    res.append("}")
+    return res
   }
 }

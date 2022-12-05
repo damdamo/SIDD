@@ -14,12 +14,8 @@ extension Int: Countable {
 final class IntervalTests: XCTestCase {
   
   func testInitialisation() {
-    var i: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 3, b: 1, rbracket: .i))
     let iEmpty: Interval<Int> = Interval(intvl: .empty)
-    
-    XCTAssertNil(i.intvl)
-    
-    i = Interval(intvl: .intvl(lbracket: .i, a: 3, b: 3, rbracket: .e))
+    var i = Interval(intvl: .intvl(lbracket: .i, a: 3, b: 3, rbracket: .e))
     XCTAssertEqual(i.intvl, iEmpty.intvl)
     
     i = Interval(intvl: .intvl(lbracket: .e, a: 3, b: 3, rbracket: .i))
@@ -30,7 +26,6 @@ final class IntervalTests: XCTestCase {
     
     i = Interval(intvl: .intvl(lbracket: .i, a: 3, b: 3, rbracket: .i))
     XCTAssertEqual(i.intvl, Interval.Intvl.intvl(lbracket: .i, a: 3, b: 3, rbracket: .i))
-    
   }
   
   func testCanonisation() {

@@ -3,7 +3,7 @@
 /// It could be visualized as: [a,b], [a,b), (a,b], (a,b)
 public struct Interval <K: Comparable & Hashable>: Hashable {  
   
-  let intvl: Intvl<K>?
+  let intvl: Intvl<K>
   
   /// Check that in <a,b>, a < b and if a = b, then only [a,a] is possible
   init(intvl: Intvl<K>) {
@@ -23,7 +23,7 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
           self.intvl = intvl
         }
       } else {
-        self.intvl = nil
+        preconditionFailure("The lower bound cannot be greater than the upper bound")
       }
     }
   }
@@ -56,7 +56,7 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
   /// - Parameters:
   ///   - i:  Interval to intersect
   /// - Returns: The result of the intersection
-  func intersection(_ i: Interval<K>) -> Interval<K>? {
+  func intersection(_ i: Interval<K>) -> Interval<K> {
     var k1: K
     var k2: K
     switch (self.intvl, i.intvl) {
@@ -100,8 +100,6 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
         b: k2,
         rbracket: rbracket)
       )
-    default:
-      return nil
     }
 
   }
@@ -110,17 +108,15 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
   /// - Parameters:
   ///   - i:  Interval to merge
   /// - Returns: The result of the union, which is a set of intervals
-  func union(_ i: Interval) -> SetIntervals<K>? {
+  func union(_ i: Interval) -> SetIntervals<K> {
     switch (self.intvl, i.intvl) {
     case (_, .empty):
       return SetIntervals(setIntervals: [self])
     case (.empty, _):
       return SetIntervals(setIntervals: [i])
     case (.intvl(let l1, let a, let b, let r1), .intvl(let l2, let c, let d, let r2)):
-      if let r = self.intersection(i)?.isEmpty() {
-        if r == true {
-          return SetIntervals(setIntervals: [self,i])
-        }
+      if self.intersection(i).isEmpty() == true {
+        return SetIntervals(setIntervals: [self,i])
       }
       var lb: Lbracket
       var rb: Rbracket
@@ -146,8 +142,6 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
       } else {
         return i.union(self)
       }
-    default:
-      return nil
     }
   }
   
@@ -155,7 +149,7 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
   /// - Parameters:
   ///   - i:  Interval to subtract
   /// - Returns: The result of the subtraction, which is a set of intervals
-  func difference(_ i: Interval) -> SetIntervals<K>? {
+  func difference(_ i: Interval) -> SetIntervals<K> {
     if self == i {
       return SetIntervals(setIntervals: [Interval(intvl: .empty)])
     }
@@ -166,10 +160,8 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
     case (.empty, _):
       return SetIntervals(setIntervals: [self])
     case (.intvl(let l1, let a, let b, let r1), .intvl(let l2, let c, let d, let r2)):
-      if let r = self.intersection(i)?.isEmpty() {
-        if r == true {
-          return SetIntervals(setIntervals: [self])
-        }
+      if self.intersection(i).isEmpty() == true {
+        return SetIntervals(setIntervals: [self])
       }
       var lb: Lbracket
       var rb: Rbracket
@@ -208,16 +200,13 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
       } else {
         return SetIntervals(setIntervals: [])
       }
-      
-    default:
-      return nil
     }
   }
   
   /// Filter "lesser than" by a value k. It keeps only values that are lower than a key.
   /// - Parameter k: The bound limit
   /// - Returns: The filtered interval
-  func filterLt(_ k: K) -> Interval? {
+  func filterLt(_ k: K) -> Interval {
     switch self.intvl {
     case .empty:
       return self
@@ -229,15 +218,13 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
       } else {
         return self
       }
-    default:
-      return nil
     }
   }
   
   /// Filter "greater than or equal" by a value k. It keeps only values that are greater or equal than a key.
   /// - Parameter k: The bound limit
   /// - Returns: The filtered interval
-  func filterGeq(_ k: K) -> Interval? {
+  func filterGeq(_ k: K) -> Interval {
     switch self.intvl {
     case .empty:
       return self
@@ -249,8 +236,6 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
       } else {
         return Interval(intvl: .empty)
       }
-    default:
-      return nil
     }
   }
   
@@ -356,7 +341,7 @@ extension Interval where K: Countable {
   /// Canonization of an interval, to get only square brackets. Intervals of the form (a,b), [a,b) and (a,b] can be rewritten into a [a',b'] form.
   /// For instance, (a,b) = [next(a), pre(b)]
   /// - Returns: The canonized interval
-  func canonized() -> Interval? {
+  func canonized() -> Interval {
     switch self.intvl {
     case .empty:
       return self
@@ -378,8 +363,6 @@ extension Interval where K: Countable {
       } else {
         return self
       }
-    default:
-      return nil
     }
   }
   

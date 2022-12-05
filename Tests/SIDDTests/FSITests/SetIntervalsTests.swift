@@ -3,21 +3,21 @@ import XCTest
 
 final class SetIntervalsTests: XCTestCase {
   
-  func testInitialisation() {
-    var i1: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 4, rbracket: .i))
-    var i2: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 7, b: 10, rbracket: .i))
-    var i3: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 3, b: 6, rbracket: .i))
-    var set: SetIntervals<Int> = SetIntervals(setIntervals: [i1,i2,i3])
-    XCTAssertNil(set.setIntervals)
-    
-    i1 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 4, rbracket: .i))
-    i2 = Interval(intvl: .intvl(lbracket: .i, a: 7, b: 10, rbracket: .i))
-    i3 = Interval(intvl: .intvl(lbracket: .e, a: 4, b: 6, rbracket: .i))
-    set = SetIntervals(setIntervals: [i1,i2,i3])
-    let expectedRes: Set<Interval<Int>> = [i1, i2, i3]
-    
-    XCTAssertEqual(set.setIntervals, expectedRes)
-  }
+//  func testInitialisation() {
+//    var i1: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 4, rbracket: .i))
+//    var i2: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 7, b: 10, rbracket: .i))
+//    var i3: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 3, b: 6, rbracket: .i))
+//    var set: SetIntervals<Int> = SetIntervals(setIntervals: [i1,i2,i3])
+//    XCTAssertNil(set.setIntervals)
+//    
+//    i1 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 4, rbracket: .i))
+//    i2 = Interval(intvl: .intvl(lbracket: .i, a: 7, b: 10, rbracket: .i))
+//    i3 = Interval(intvl: .intvl(lbracket: .e, a: 4, b: 6, rbracket: .i))
+//    set = SetIntervals(setIntervals: [i1,i2,i3])
+//    let expectedRes: Set<Interval<Int>> = [i1, i2, i3]
+//    
+//    XCTAssertEqual(set.setIntervals, expectedRes)
+//  }
   
   func testUnionBasic() {
     let i1: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 5, rbracket: .i))

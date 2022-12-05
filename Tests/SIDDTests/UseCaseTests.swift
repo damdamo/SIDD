@@ -16,7 +16,7 @@ final class UseCaseTests: XCTestCase {
       mutProcessIntervals[processNb] = nil
       let tempFamily = combinatoryProcesses(processIntervals: mutProcessIntervals)
       for interval in set {
-        f = f.union(tempFamily.add(interval)!)!
+        f = f.union(tempFamily.add(interval))
       }
     }
     
@@ -39,7 +39,7 @@ final class UseCaseTests: XCTestCase {
     let nb = processes.keys.count
     
     var res = combinatoryProcesses(processIntervals: processIntervals)
-    res = FamilySetsIntervals(familySetsIntervals: res.familySetsIntervals?.filter({$0.setIntervals?.count == nb}))
+    res = FamilySetsIntervals(familySetsIntervals: res.familySetsIntervals.filter({$0.setIntervals.count == nb}))
     
     return res
   }

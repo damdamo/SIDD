@@ -19,8 +19,6 @@ extension Interval: CustomStringConvertible {
       case .i:
         res.append("]")
       }
-    default:
-      return ""
     }
     return res
   }
