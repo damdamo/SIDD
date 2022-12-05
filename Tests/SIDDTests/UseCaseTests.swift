@@ -45,11 +45,15 @@ final class UseCaseTests: XCTestCase {
   }
   
   func testMultipleProcesses() {
-        
-    let x = sscProcess(processes: [1: 3, 2: 5, 3: 9, 4: 7], totalTime: 25)
     
+    let stopwatch = Stopwatch()
+    
+    let x = sscProcess(processes: [1: 3, 2: 5], totalTime: 9)
+//    let x = sscProcess(processes: [1: 3, 2: 5, 3: 9, 4: 7], totalTime: 25)
+    
+    print("Time: \(stopwatch.elapsed.humanFormat)")
     print(x.count())
     
   }
   
-  }
+}
