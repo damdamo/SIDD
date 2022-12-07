@@ -163,13 +163,13 @@ public final class SIDDFactory<Key>: DecisionDiagramFactory where Key: Comparabl
     
     let take = sidd.pointer.pointee.take
     let skip = sidd.pointer.pointee.skip
+    let lbracket: Interval<Key>.Lbracket = isIncluded ? .i : .e
+    let rbracket: Interval<Key>.Rbracket = sidd.pointer.pointee.isIncluded ? .i : .e
     
     if take == zeroPointer {
       if skip == zeroPointer {
         return FamilySetsIntervals(familySetsIntervals: [])
       } else if skip == onePointer {
-        let lbracket: Interval<Key>.Lbracket = isIncluded ? .i : .e
-        let rbracket: Interval<Key>.Rbracket = sidd.pointer.pointee.isIncluded ? .i : .e
         return FamilySetsIntervals(
           familySetsIntervals: [
             SetIntervals(
@@ -178,18 +178,17 @@ public final class SIDDFactory<Key>: DecisionDiagramFactory where Key: Comparabl
           ]
         )
       }
-      return decode(sidd: SIDD(pointer: skip, factory: self), bound: skip.pointee.key, isIncluded: skip.pointee.isIncluded)
+      let interval = Interval<Key>(intvl: .intvl(lbracket: lbracket, a: bound, b: sidd.pointer.pointee.key, rbracket: rbracket))
+      return decode(sidd: SIDD(pointer: skip, factory: self), bound: skip.pointee.key, isIncluded: skip.pointee.isIncluded).add(interval)
     }
     
     if isTerminal(skip) {
       return decodeTau(sidd: SIDD(pointer: take, factory: self), bound: take.pointee.key, isIncluded: isIncluded).union(decode(sidd: SIDD(pointer: skip, factory: self), bound: bound, isIncluded: isIncluded))
     }
     
-    let lbracket: Interval<Key>.Lbracket = isIncluded ? .i : .e
-    let rbracket: Interval<Key>.Rbracket = sidd.pointer.pointee.isIncluded ? .i : .e
     let interval = Interval<Key>(intvl: .intvl(lbracket: lbracket, a: bound, b: sidd.pointer.pointee.key, rbracket: rbracket))
     
-    return decodeTau(sidd: SIDD(pointer: take, factory: self), bound: take.pointee.key, isIncluded: isIncluded).union(decode(sidd: SIDD(pointer: skip, factory: self), bound: skip.pointee.key, isIncluded: isIncluded).add(interval))
+    return decodeTau(sidd: SIDD(pointer: take, factory: self), bound: bound, isIncluded: isIncluded).union(decode(sidd: SIDD(pointer: skip, factory: self), bound: skip.pointee.key, isIncluded: isIncluded).add(interval))
     
   }
 

@@ -133,7 +133,9 @@ extension SIDDFactory {
     }
 
 //    cache.union[cacheKey] = result
-    return result  }
+    return result
+    
+  }
 
   /// Returns the union of multiple SIDDs.
   public func union<S>(of families: S) -> SIDD<Key>.Pointer

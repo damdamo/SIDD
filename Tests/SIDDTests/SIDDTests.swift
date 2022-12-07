@@ -5,20 +5,68 @@ final class SIDDTests: XCTestCase {
 
   func testDecode() {
     let factory = SIDDFactory<Int>()
-    let node1 = factory.node(key: 5, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: false)
-    let node2 = factory.node(key: 10, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
-    let node3 = factory.node(key: 8, take: node2, skip: factory.zeroPointer, isIncluded: false)
-    let node4 = factory.node(key: 1, take: node1, skip: node3, isIncluded: true)
+    var node1 = factory.node(key: 5, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: false)
+    var node2 = factory.node(key: 10, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    var node3 = factory.node(key: 8, take: node2, skip: factory.zeroPointer, isIncluded: false)
+    var node4 = factory.node(key: 1, take: node1, skip: node3, isIncluded: true)
     
-    let interval1: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 5, rbracket: .e))
-    let interval2: Interval<Int> = Interval(intvl: .intvl(lbracket: .e, a: 8, b: 10, rbracket: .i))
-    let set1: SetIntervals<Int> = SetIntervals(setIntervals: [interval1])
-    let set2: SetIntervals<Int> = SetIntervals(setIntervals: [interval2])
-    let family: FamilySetsIntervals<Int> = FamilySetsIntervals(familySetsIntervals: [set1, set2])
-    
+    var interval1: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 5, rbracket: .e))
+    var interval2: Interval<Int> = Interval(intvl: .intvl(lbracket: .e, a: 8, b: 10, rbracket: .i))
+    var set1: SetIntervals<Int> = SetIntervals(setIntervals: [interval1])
+    var set2: SetIntervals<Int> = SetIntervals(setIntervals: [interval2])
+    var family: FamilySetsIntervals<Int> = FamilySetsIntervals(familySetsIntervals: [set1, set2])
     // Family: {{[1,5)}, {(8,10]}}
     XCTAssertEqual(factory.decode(sidd: SIDD(pointer: node4, factory: factory)), family)
     // print(factory.decode(sidd: SIDD(pointer: node4, factory: factory)))
+    
+    node1 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    node2 = factory.node(key: 7, take: node1, skip: factory.onePointer, isIncluded: true)
+    node3 = factory.node(key: 5, take: factory.zeroPointer, skip: node2, isIncluded: true)
+    node4 = factory.node(key: 3, take: node3, skip: factory.zeroPointer, isIncluded: true)
+    
+    interval1 = Interval(intvl: .intvl(lbracket: .i, a: 3, b: 5, rbracket: .i))
+    interval2 = Interval(intvl: .intvl(lbracket: .i, a: 7, b: 9, rbracket: .i))
+    set1 = SetIntervals(setIntervals: [interval1])
+    set2 = SetIntervals(setIntervals: [interval1, interval2])
+    family = FamilySetsIntervals(familySetsIntervals: [set1, set2])
+    // Family: {{[3,5]}, {[3,5], [7,9]}}
+    XCTAssertEqual(factory.decode(sidd: SIDD(pointer: node4, factory: factory)), family)
+    
+    node1 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    node2 = factory.node(key: 7, take: node1, skip: factory.zeroPointer, isIncluded: true)
+    node3 = factory.node(key: 3, take: node1, skip: node2, isIncluded: true)
+    node4 = factory.node(key: 1, take: node3, skip: factory.zeroPointer, isIncluded: true)
+    
+    // Family: {{[1,9]}, {[1,3], [7,9]}}
+    interval1 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 9, rbracket: .i))
+    interval2 = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 3, rbracket: .i))
+    let interval3 = Interval(intvl: .intvl(lbracket: .i, a: 7, b: 9, rbracket: .i))
+    set1 = SetIntervals(setIntervals: [interval1])
+    set2 = SetIntervals(setIntervals: [interval2, interval3])
+    family = FamilySetsIntervals(familySetsIntervals: [set1, set2])
+    XCTAssertEqual(factory.decode(sidd: SIDD(pointer: node4, factory: factory)), family)
+  }
+  
+  func testUnion() {
+    let factory = SIDDFactory<Int>()
+    var node1 = factory.node(key: 5, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: false)
+    var node2 = factory.node(key: 10, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    var node3 = factory.node(key: 8, take: node2, skip: factory.zeroPointer, isIncluded: false)
+    var node4 = factory.node(key: 1, take: node1, skip: node3, isIncluded: true)
+
+    var node5 = factory.node(key: 1, take: node1, skip: factory.zeroPointer, isIncluded: true)
+
+    XCTAssertEqual(factory.union(node3, node5), node4)
+    
+    node1 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    node2 = factory.node(key: 7, take: node1, skip: factory.onePointer, isIncluded: true)
+    node3 = factory.node(key: 5, take: factory.zeroPointer, skip: node2, isIncluded: true)
+    node4 = factory.node(key: 3, take: node3, skip: factory.zeroPointer, isIncluded: true)
+    
+    node5 = factory.node(key: 6, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    let node6 = factory.node(key: 3, take: node5, skip: factory.zeroPointer, isIncluded: true)
+    
+    print(factory.decode(sidd: SIDD(pointer: node4, factory: factory)))
 
   }
   
