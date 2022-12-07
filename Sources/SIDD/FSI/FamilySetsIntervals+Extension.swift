@@ -1,10 +1,10 @@
-extension SetIntervals: CustomStringConvertible {
+extension FamilySetsIntervals: CustomStringConvertible {
   public var description: String {
-    if self.setIntervals == [] {
+    if self.familySetsIntervals == [] {
       return "{}"
     }
     var res: String = "{"
-    for s in self.setIntervals {
+    for s in self.familySetsIntervals {
       res.append("\(s), ")
     }
     res.removeLast(2)
