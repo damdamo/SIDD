@@ -104,10 +104,10 @@ extension SIDDFactory {
     }
 
     // Query the cache.
-//    let cacheKey = lhs < rhs ? [lhs, rhs] : [rhs, lhs]
-//    if let pointer = cache.union[cacheKey] {
-//      return pointer
-//    }
+    let cacheKey = lhs < rhs ? [lhs, rhs] : [rhs, lhs]
+    if let pointer = cache.union[cacheKey] {
+      return pointer
+    }
 
     // Compute the union of `lhs` with `rhs`.
     let result: SIDD<Key>.Pointer
@@ -132,7 +132,7 @@ extension SIDDFactory {
         isIncluded: rhs.pointee.isIncluded)
     }
 
-//    cache.union[cacheKey] = result
+    cache.union[cacheKey] = result
     return result
     
   }

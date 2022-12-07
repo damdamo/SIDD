@@ -56,6 +56,7 @@ final class SIDDTests: XCTestCase {
 
     var node5 = factory.node(key: 1, take: node1, skip: factory.zeroPointer, isIncluded: true)
 
+    // Union: {{(8,10]}} U {{[1,5)}} = {{[1,5)}, {(8,10]}}
     XCTAssertEqual(factory.union(node3, node5), node4)
     
     node1 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
@@ -66,8 +67,14 @@ final class SIDDTests: XCTestCase {
     node5 = factory.node(key: 6, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
     let node6 = factory.node(key: 3, take: node5, skip: factory.zeroPointer, isIncluded: true)
     
-    print(factory.decode(sidd: SIDD(pointer: node4, factory: factory)))
+    let node7 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    let node8 = factory.node(key: 7, take: node7, skip: factory.onePointer, isIncluded: true)
+    let node9 = factory.node(key: 6, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    let node10 = factory.node(key: 5, take: node9, skip: node8, isIncluded: true)
+    let node11 = factory.node(key: 3, take: node10, skip: factory.zeroPointer, isIncluded: true)
 
+    // Union: {{[3,5]}, {[3,5], [7,9]}} U {{[3,6]}} = {{[3,5]}, {[3,5], [7,9]}, {[3,6]}}
+    XCTAssertEqual(node11, factory.union(node4, node6))
   }
   
 //  func testNodeCreation() {
