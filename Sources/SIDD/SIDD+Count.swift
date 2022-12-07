@@ -1,8 +1,29 @@
-//
-//  File 2.swift
-//  
-//
-//  Created by Damien Morard on 05.12.22.
-//
+extension SIDD {
 
-import Foundation
+  private struct MemberCounter {
+
+    var cache: [Pointer: Int]
+
+    init(factory: SIDDFactory<Key>) {
+      cache = [factory.zeroPointer: 0, factory.onePointer: 1]
+    }
+
+    mutating func visit(_ pointer: Pointer) -> Int {
+      if let count = cache[pointer] {
+        return count
+      }
+
+      let count = visit(pointer.pointee.take) + visit(pointer.pointee.skip)
+      cache[pointer] = count
+      return count
+    }
+
+  }
+
+  /// The number of members in the family.
+  public var count: Int {
+    var counter = MemberCounter(factory: factory)
+    return counter.visit(pointer)
+  }
+
+}
