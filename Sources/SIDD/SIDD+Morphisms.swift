@@ -310,23 +310,23 @@ extension SIDD {
     }
 
     public func apply(on pointer: SIDD.Pointer) -> SIDD.Pointer {
-//      // Check for trivial cases.
-//      guard !factory.isTerminal(pointer)
-//        else { return pointer }
-//
-//      // Query the cache.
-//      if let result = cache[pointer] {
-//        return result
-//      }
-//
-//      let result = factory.node(
-//        key: transform(pointer.pointee.key),
-//        take: apply(on: pointer.pointee.take),
-//        skip: apply(on: pointer.pointee.skip))
-//
-//      cache[pointer] = result
-//      return result
-      return factory.zeroPointer
+      // Check for trivial cases.
+      guard !factory.isTerminal(pointer)
+        else { return pointer }
+
+      // Query the cache.
+      if let result = cache[pointer] {
+        return result
+      }
+
+      let result = factory.node(
+        key: transform(pointer.pointee.key),
+        take: apply(on: pointer.pointee.take),
+        skip: apply(on: pointer.pointee.skip),
+        isIncluded: pointer.pointee.isIncluded)
+
+      cache[pointer] = result
+      return result
 
     }
 
@@ -372,27 +372,26 @@ extension SIDD {
     }
 
     public func apply(on pointer: SIDD.Pointer) -> SIDD.Pointer {
-//      // Check for trivial cases.
-//      guard pointer != factory.zeroPointer
-//        else { return pointer }
-//      guard pointer != factory.onePointer
-//        else { return substitute.pointer }
-//
-//      // Query the cache.
-//      if let result = cache[pointer] {
-//        return result
-//      }
-//
-//      let fn = function(self, pointer)
-//      let result = factory.node(
-//        key: pointer.pointee.key,
-//        take: fn.take(pointer.pointee.take),
-//        skip: fn.skip(pointer.pointee.skip))
-//
-//      cache[pointer] = result
-//      return result
-      return factory.zeroPointer
+      // Check for trivial cases.
+      guard pointer != factory.zeroPointer
+        else { return pointer }
+      guard pointer != factory.onePointer
+        else { return substitute.pointer }
 
+      // Query the cache.
+      if let result = cache[pointer] {
+        return result
+      }
+
+      let fn = function(self, pointer)
+      let result = factory.node(
+        key: pointer.pointee.key,
+        take: fn.take(pointer.pointee.take),
+        skip: fn.skip(pointer.pointee.skip),
+        isIncluded: pointer.pointee.isIncluded)
+
+      cache[pointer] = result
+      return result
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -429,27 +428,26 @@ extension SIDD {
     }
 
     public func apply(on pointer: SIDD.Pointer) -> SIDD.Pointer {
-//      // Query the cache.
-//      if let result = cache[pointer] {
-//        return result
-//      }
-//
-//      let result: SIDD.Pointer
-//      if pointer == factory.zeroPointer || pointer == factory.onePointer {
-//        result = morphism.apply(on: pointer)
-//      } else if pointer.pointee.key < lowestRelevantKey {
-//        result = factory.node(
-//          key: pointer.pointee.key,
-//          take: apply(on: pointer.pointee.take),
-//          skip: apply(on: pointer.pointee.skip))
-//      } else {
-//        result = morphism.apply(on: pointer)
-//      }
-//
-//      cache[pointer] = result
-//      return result
-      return factory.zeroPointer
+      // Query the cache.
+      if let result = cache[pointer] {
+        return result
+      }
 
+      let result: SIDD.Pointer
+      if pointer == factory.zeroPointer || pointer == factory.onePointer {
+        result = morphism.apply(on: pointer)
+      } else if pointer.pointee.key < lowestRelevantKey {
+        result = factory.node(
+          key: pointer.pointee.key,
+          take: apply(on: pointer.pointee.take),
+          skip: apply(on: pointer.pointee.skip),
+          isIncluded: pointer.pointee.isIncluded)
+      } else {
+        result = morphism.apply(on: pointer)
+      }
+
+      cache[pointer] = result
+      return result
     }
 
     public func hash(into hasher: inout Hasher) {
