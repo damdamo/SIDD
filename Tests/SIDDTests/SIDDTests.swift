@@ -45,6 +45,17 @@ final class SIDDTests: XCTestCase {
     set2 = SetIntervals(setIntervals: [interval2, interval3])
     family = FamilySetsIntervals(familySetsIntervals: [set1, set2])
     XCTAssertEqual(factory.decode(sidd: SIDD(pointer: node4, factory: factory)), family)
+    
+    // Family: {{[2,9]}, {[2,6)}}
+    node1 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    node2 = factory.node(key: 6, take: node1, skip: factory.onePointer, isIncluded: false)
+    node3 = factory.node(key: 2, take: node2, skip: factory.zeroPointer, isIncluded: true)
+    interval1 = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 9, rbracket: .i))
+    interval2 = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 6, rbracket: .e))
+    set1 = SetIntervals(setIntervals: [interval1])
+    set2 = SetIntervals(setIntervals: [interval2])
+    family = FamilySetsIntervals(familySetsIntervals: [set1, set2])
+    XCTAssertEqual(factory.decode(sidd: SIDD(pointer: node3, factory: factory)), family)
   }
   
   func testUnion() {
@@ -80,20 +91,28 @@ final class SIDDTests: XCTestCase {
   func testInsertion() {
     var morphisms: SIDDMorphismFactory<Int> {factory.morphisms}
     let factory = SIDDFactory<Int>()
-    var node1 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
-    var node2 = factory.node(key: 6, take: node1, skip: factory.onePointer, isIncluded: true)
-    var node3 = factory.node(key: 2, take: node2, skip: factory.zeroPointer, isIncluded: true)
+    let node1 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    let node2 = factory.node(key: 6, take: node1, skip: factory.onePointer, isIncluded: true)
+    let node3 = factory.node(key: 2, take: node2, skip: factory.zeroPointer, isIncluded: true)
     var interval: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 10, rbracket: .i))
-    let morphism = morphisms.insert(interval: interval)
+    var morphism = morphisms.insert(interval: interval)
     
     var node4 = factory.node(key: 10, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
     var node5 = factory.node(key: 2, take: node4, skip: factory.zeroPointer, isIncluded: true)
     
-    
-    print(factory.decode(sidd: SIDD(pointer: node3, factory: factory)))
     // {{[2,10]}}
     XCTAssertEqual(morphism.apply(on: node3), node5)
+    
+    interval = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 7, rbracket: .i))
+    node4 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    node5 = factory.node(key: 7, take: node4, skip: factory.onePointer, isIncluded: true)
+    let node6 = factory.node(key: 1, take: node5, skip: factory.zeroPointer, isIncluded: true)
+    morphism = morphisms.insert(interval: interval)
+    
+    // {{[1,7]}, {[1,9]}}
+    XCTAssertEqual(morphism.apply(on: node3), node6)
   }
+  
 //  func testNodeCreation() {
 //    let factory = SFDDFactory<Int>(bucketCapacity: 4)
 //
