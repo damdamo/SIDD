@@ -16,10 +16,10 @@ extension SIDD {
     public typealias DD = SIDD
 
     /// The keys inserted by this morphism.
-    public let keys: [Key]
+    public let interval: Interval<Key>
 
     /// The next morphism to apply once the first key has been processed.
-    private var next: SaturatedMorphism<Insert>?
+//    private var next: SaturatedMorphism<Insert>?
 
     /// The factory that creates the nodes handled by this morphism.
     public unowned let factory: SIDDFactory<Key>
@@ -27,57 +27,214 @@ extension SIDD {
     /// The morphism's cache.
     private var cache: [SIDD.Pointer: SIDD.Pointer] = [:]
 
-    public var lowestRelevantKey: Key { keys.min()! }
+    public var lowestRelevantKey: Key { interval.lowerBound! }
 
-    init(keys: [Key], factory: SIDDFactory<Key>) {
-      assert(!keys.isEmpty, "Sequence of keys to insert is empty.")
-      self.keys = keys.sorted()
-      self.next = keys.count > 1
-        ? factory.morphisms.saturate(factory.morphisms.insert(keys: self.keys.dropFirst()))
-        : nil
-
+    init(interval: Interval<Key>, factory: SIDDFactory<Key>) {
+      self.interval = interval
       self.factory = factory
     }
 
     public func apply(on pointer: SIDD.Pointer) -> SIDD.Pointer {
-//      // Check for trivial cases.
-//      guard pointer != factory.zeroPointer
-//        else { return pointer }
-//
-//      // Query the cache.
-//      if let result = cache[pointer] {
-//        return result
-//      }
-//
-//      // Apply the morphism.
-//      let result: SIDD.Pointer
-//      if pointer == factory.onePointer {
-//        result = factory.encode(family: [keys]).pointer
-//      } else if pointer.pointee.key < keys[0] {
-//        result = factory.node(
-//          key: pointer.pointee.key,
-//          take: apply(on: pointer.pointee.take),
-//          skip: apply(on: pointer.pointee.skip))
-//      } else if pointer.pointee.key == keys[0] {
-//        let tail = factory.union(pointer.pointee.take, pointer.pointee.skip)
-//        result = factory.node(
-//          key: pointer.pointee.key,
-//          take: next?.apply(on: tail) ?? tail,
-//          skip: factory.zeroPointer)
-//      } else {
-//        result = factory.node(
-//          key: keys[0],
-//          take: next?.apply(on: pointer) ?? pointer,
-//          skip: factory.zeroPointer)
-//      }
-//
-//      cache[pointer] = result
-//      return result
-      return factory.zeroPointer
+      // Check for trivial cases.
+      guard pointer != factory.zeroPointer
+        else { return pointer }
+
+      // Query the cache.
+      if let result = cache[pointer] {
+        return result
+      }
+
+      // Apply the morphism.
+      let result: SIDD.Pointer
+      let take = pointer.pointee.take
+      let skip = pointer.pointee.skip
+      let a = interval.lowerBound!
+      let b = interval.upperBound!
+      
+      // pointer = ⊤
+      if pointer == factory.onePointer {
+        let upperNode = factory.node(
+          key: b,
+          take: factory.zeroPointer,
+          skip: factory.onePointer,
+          isIncluded: interval.rbracket == .i)
+        result = factory.node(
+          key: a,
+          take: upperNode,
+          skip: factory.zeroPointer,
+          isIncluded: interval.lbracket == .i)
+      // 𝛕 = ⊥
+      } else if factory.isTerminal(take) {
+        // σ != ⊤
+        if !factory.isTerminal(skip) {
+          result = apply(on: skip)
+        // σ = ⊤
+        } else {
+          let upperNode = factory.node(
+            key: b,
+            take: factory.zeroPointer,
+            skip: factory.onePointer,
+            isIncluded: interval.rbracket == .i)
+          result = factory.node(
+            key: a,
+            take: upperNode,
+            skip: factory.zeroPointer,
+            isIncluded: interval.lbracket == .i)
+        }
+      // 𝛕 != ⊥ ∧ σ = ⊥
+      } else if !factory.isTerminal(take) && skip == factory.zeroPointer {
+        let k = pointer.pointee.key
+        let kp = take.pointee.key
+        if b < k {
+          let node1 = factory.node(
+            key: k,
+            take: take,
+            skip: skip,
+            isIncluded: pointer.pointee.isIncluded)
+          let upperNode = factory.node(
+            key: b,
+            take: node1,
+            skip: factory.onePointer,
+            isIncluded: interval.rbracket == .i)
+          result = factory.node(
+            key: a,
+            take: upperNode,
+            skip: factory.zeroPointer,
+            isIncluded: interval.lbracket == .i)
+        } else if a < k && b >= k && b <= kp {
+          let node1 = factory.node(
+            key: k,
+            take: take,
+            skip: skip,
+            isIncluded: pointer.pointee.isIncluded)
+          result = factory.node(
+            key: a,
+            take: node1,
+            skip: factory.zeroPointer,
+            isIncluded: interval.lbracket == .i)
+        } else if a >= k && b <= kp {
+          result = factory.node(
+            key: k,
+            take: take,
+            skip: factory.zeroPointer,
+            isIncluded: pointer.pointee.isIncluded)
+        } else if a < k && b >= kp {
+          result = factory.node(
+            key: a,
+            take: applyTau(on: take),
+            skip: factory.zeroPointer,
+            isIncluded: interval.lbracket == .i)
+        } else {
+          let x = applyTau(on: take)
+          result = factory.node(
+            key: k,
+            take: x,
+            skip: factory.zeroPointer,
+            isIncluded: pointer.pointee.isIncluded)
+        }
+      // 𝛕 != ⊥ ∧ σ != ⊥
+      } else {
+        let k = pointer.pointee.key
+        let node1 = apply(on: factory.node(
+          key: k,
+          take: take,
+          skip: factory.zeroPointer,
+          isIncluded: pointer.pointee.isIncluded))
+        let node2 = apply(on: skip)
+        result = factory.union(node1, node2)
+      }
+      
+      cache[pointer] = result
+      return result
+    }
+    
+    public func applyTau(on pointer: SIDD.Pointer) -> SIDD.Pointer {
+      // Check for trivial cases.
+      guard pointer != factory.zeroPointer
+        else { return pointer }
+
+      // Query the cache.
+      if let result = cache[pointer] {
+        return result
+      }
+
+      // Apply the morphism.
+      let result: SIDD.Pointer
+      let take = pointer.pointee.take
+      let skip = pointer.pointee.skip
+      let a = interval.lowerBound!
+      let b = interval.upperBound!
+      let k = pointer.pointee.key
+      
+      // 𝛕 = ⊥
+      if factory.isTerminal(take) {
+        // σ = ⊥
+        if skip == factory.zeroPointer {
+          return factory.zeroPointer
+        // σ = ⊤
+        } else if skip == factory.onePointer {
+          if b < k {
+            result = factory.node(
+              key: k,
+              take: factory.zeroPointer,
+              skip: factory.onePointer,
+              isIncluded: pointer.pointee.isIncluded)
+          } else if a <= k && b >= k {
+            result = factory.node(
+              key: b,
+              take: factory.zeroPointer,
+              skip: factory.onePointer,
+              isIncluded: interval.rbracket! == .i)
+          } else {
+            let upperNode = factory.node(
+              key: b,
+              take: factory.zeroPointer,
+              skip: factory.onePointer,
+              isIncluded: interval.rbracket == .i)
+            let lowerNode = factory.node(
+              key: a,
+              take: upperNode,
+              skip: factory.zeroPointer,
+              isIncluded: interval.lbracket == .i)
+            result = factory.node(
+              key: k,
+              take: factory.zeroPointer,
+              skip: lowerNode,
+              isIncluded: pointer.pointee.isIncluded)
+          }
+        // σ != (⊤ ∨ ⊥)
+        } else {
+          result = factory.node(
+            key: k,
+            take: factory.zeroPointer,
+            skip: apply(on: skip),
+            isIncluded: pointer.pointee.isIncluded)
+        }
+      // 𝛕 != ⊥ ∧ σ = ⊥
+      } else if skip == factory.zeroPointer {
+        result = applyTau(on: take)
+      // 𝛕 != ⊥ ∧ σ != ⊥
+      } else {
+        let k = pointer.pointee.key
+        let node1 = applyTau(on: factory.node(
+          key: k,
+          take: take,
+          skip: factory.zeroPointer,
+          isIncluded: pointer.pointee.isIncluded))
+        let node2 = applyTau(on: factory.node(
+          key: k,
+          take: factory.zeroPointer,
+          skip: skip,
+          isIncluded: pointer.pointee.isIncluded))
+        result = factory.unionTau(node1, node2)
+      }
+      
+      cache[pointer] = result
+      return result
     }
 
     public func hash(into hasher: inout Hasher) {
-      hasher.combine(keys)
+      hasher.combine(interval)
     }
 
     public static func == (lhs: Insert, rhs: Insert) -> Bool {
@@ -561,9 +718,9 @@ public final class SIDDMorphismFactory<Key> where Key: Comparable & Hashable {
 
   /// Creates an _insert_ morphism.
   ///
-  /// - Parameter keys: A sequence with the keys to insert.
-  public func insert<S>(keys: S) -> SIDD<Key>.Insert where S: Sequence, S.Element == Key {
-    let (_, morphism) = cache.insert(SIDD.Insert(keys: Array(keys), factory: nodeFactory))
+  /// - Parameter interval: An interval to insert
+  public func insert(interval: Interval<Key>) -> SIDD<Key>.Insert {
+    let (_, morphism) = cache.insert(SIDD.Insert(interval: interval, factory: nodeFactory))
     return morphism
   }
 

@@ -77,6 +77,23 @@ final class SIDDTests: XCTestCase {
     XCTAssertEqual(node11, factory.union(node4, node6))
   }
   
+  func testInsertion() {
+    var morphisms: SIDDMorphismFactory<Int> {factory.morphisms}
+    let factory = SIDDFactory<Int>()
+    var node1 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    var node2 = factory.node(key: 6, take: node1, skip: factory.onePointer, isIncluded: true)
+    var node3 = factory.node(key: 2, take: node2, skip: factory.zeroPointer, isIncluded: true)
+    var interval: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 10, rbracket: .i))
+    let morphism = morphisms.insert(interval: interval)
+    
+    var node4 = factory.node(key: 10, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    var node5 = factory.node(key: 2, take: node4, skip: factory.zeroPointer, isIncluded: true)
+    
+    
+    print(factory.decode(sidd: SIDD(pointer: node3, factory: factory)))
+    // {{[2,10]}}
+    XCTAssertEqual(morphism.apply(on: node3), node5)
+  }
 //  func testNodeCreation() {
 //    let factory = SFDDFactory<Int>(bucketCapacity: 4)
 //

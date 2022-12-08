@@ -27,6 +27,43 @@ public struct Interval <K: Comparable & Hashable>: Hashable {
       }
     }
   }
+  
+  var lowerBound: K? {
+    switch intvl {
+    case .empty:
+      return nil
+    case .intvl(lbracket: _, a: let a, b: _, rbracket: _):
+      return a
+    }
+  }
+  
+  var upperBound: K? {
+    switch intvl {
+    case .empty:
+      return nil
+    case .intvl(lbracket: _, a: _, b: let b, rbracket: _):
+      return b
+    }
+  }
+  
+  var lbracket: Lbracket? {
+    switch intvl {
+    case .empty:
+      return nil
+    case .intvl(lbracket: let l, a: _, b: _, rbracket: _):
+      return l
+    }
+  }
+  
+  var rbracket: Rbracket? {
+    switch intvl {
+    case .empty:
+      return nil
+    case .intvl(lbracket: _, a: _, b: _, rbracket: let r):
+      return r
+    }
+  }
+
     
   /// Left bracket
   enum Lbracket: Hashable {

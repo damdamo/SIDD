@@ -182,8 +182,19 @@ public final class SIDDFactory<Key>: DecisionDiagramFactory where Key: Comparabl
       return decode(sidd: SIDD(pointer: skip, factory: self), bound: skip.pointee.key, isIncluded: skip.pointee.isIncluded).add(interval)
     }
     
-    if isTerminal(skip) {
-      return decodeTau(sidd: SIDD(pointer: take, factory: self), bound: take.pointee.key, isIncluded: isIncluded).union(decode(sidd: SIDD(pointer: skip, factory: self), bound: bound, isIncluded: isIncluded))
+//    if isTerminal(skip) {
+//      return decodeTau(sidd: SIDD(pointer: take, factory: self), bound: take.pointee.key, isIncluded: isIncluded).union(decode(sidd: SIDD(pointer: skip, factory: self), bound: bound, isIncluded: isIncluded))
+//    }
+    if skip == zeroPointer {
+      return decodeTau(sidd: SIDD(pointer: take, factory: self), bound: bound, isIncluded: isIncluded)
+    } else if skip == onePointer {
+      return decodeTau(sidd: SIDD(pointer: take, factory: self), bound: bound, isIncluded: isIncluded).union(FamilySetsIntervals(
+        familySetsIntervals: [
+          SetIntervals(
+            setIntervals: [Interval(intvl: .intvl(lbracket: lbracket, a: bound, b: sidd.pointer.pointee.key, rbracket: rbracket))]
+          )
+        ]
+      ))
     }
     
     let interval = Interval<Key>(intvl: .intvl(lbracket: lbracket, a: bound, b: sidd.pointer.pointee.key, rbracket: rbracket))
