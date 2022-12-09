@@ -91,26 +91,85 @@ final class SIDDTests: XCTestCase {
   func testInsertion() {
     var morphisms: SIDDMorphismFactory<Int> {factory.morphisms}
     let factory = SIDDFactory<Int>()
-    let node1 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
-    let node2 = factory.node(key: 6, take: node1, skip: factory.onePointer, isIncluded: true)
-    let node3 = factory.node(key: 2, take: node2, skip: factory.zeroPointer, isIncluded: true)
+    var node1 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    var node2 = factory.node(key: 6, take: node1, skip: factory.onePointer, isIncluded: true)
+    var node3 = factory.node(key: 2, take: node2, skip: factory.zeroPointer, isIncluded: true)
     var interval: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 2, b: 10, rbracket: .i))
     var morphism = morphisms.insert(interval: interval)
-    
+        
     var node4 = factory.node(key: 10, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
     var node5 = factory.node(key: 2, take: node4, skip: factory.zeroPointer, isIncluded: true)
     
-    // {{[2,10]}}
+    // T + [2,10] = {{[2,10]}}
+    XCTAssertEqual(morphism.apply(on: factory.onePointer), node5)
+    // {{[2,6]}, {[2,9]}} + [2,10] = {{[2,10]}}
     XCTAssertEqual(morphism.apply(on: node3), node5)
+    var node6 = factory.node(key: 1, take: factory.zeroPointer, skip: node3, isIncluded: true)
+    // {{[2,6]}, {[2,9]}} + [2,10] = {{[2,10]}} (However the SIDD starts with 1 that is skipped
+    XCTAssertEqual(morphism.apply(on: node6), node5)
+    // <1, ⊥, ⊥> + [2,10] = ⊥
+    node6 = factory.node(key: 1, take: factory.zeroPointer, skip: factory.zeroPointer, isIncluded: true)
+    XCTAssertEqual(morphism.apply(on: node6), factory.zeroPointer)
+    node6 = factory.node(key: 1, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    // <1, ⊥, T> + [2,10] = {{[2,10]}}
+    XCTAssertEqual(morphism.apply(on: node6), node5)
     
     interval = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 7, rbracket: .i))
     node4 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
     node5 = factory.node(key: 7, take: node4, skip: factory.onePointer, isIncluded: true)
-    let node6 = factory.node(key: 1, take: node5, skip: factory.zeroPointer, isIncluded: true)
+    node6 = factory.node(key: 1, take: node5, skip: factory.zeroPointer, isIncluded: true)
     morphism = morphisms.insert(interval: interval)
     
-    // {{[1,7]}, {[1,9]}}
+    // {{[2,6]}, {[2,9]}} + [1,7] = {{[1,7]}, {[1,9]}}
     XCTAssertEqual(morphism.apply(on: node3), node6)
+    
+    node1 = factory.node(key: 25, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    node2 = factory.node(key: 20, take: node1, skip: factory.zeroPointer, isIncluded: true)
+    node3 = factory.node(key: 6, take: factory.zeroPointer, skip: node2, isIncluded: true)
+    node4 = factory.node(key: 2, take: node3, skip: factory.zeroPointer, isIncluded: true)
+    
+    interval = Interval(intvl: .intvl(lbracket: .i, a: 10, b: 15, rbracket: .i))
+    morphism = morphisms.insert(interval: interval)
+    
+    node5 = factory.node(key: 25, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    node6 = factory.node(key: 20, take: node5, skip: factory.zeroPointer, isIncluded: true)
+    var node7 = factory.node(key: 15, take: factory.zeroPointer, skip: node6, isIncluded: true)
+    var node8 = factory.node(key: 10, take: node7, skip: factory.zeroPointer, isIncluded: true)
+    var node9 = factory.node(key: 6, take: factory.zeroPointer, skip: node8, isIncluded: true)
+    var node10 = factory.node(key: 2, take: node9, skip: factory.zeroPointer, isIncluded: true)
+    
+    // {{[20,25], [2,6]}} + [10,15] = {{[2,6], [10,15], [20,25]}}
+    XCTAssertEqual(morphism.apply(on: node4), node10)
+
+    interval = Interval(intvl: .intvl(lbracket: .i, a: 5, b: 15, rbracket: .i))
+    morphism = morphisms.insert(interval: interval)
+    
+    node9 = factory.node(key: 2, take: node7, skip: factory.zeroPointer, isIncluded: true)
+    // {{[20,25], [2,6]}} + [5,15] = {{[20,25], [2,15]}}
+    XCTAssertEqual(morphism.apply(on: node4), node9)
+
+    interval = Interval(intvl: .intvl(lbracket: .i, a: 5, b: 21, rbracket: .i))
+    morphism = morphisms.insert(interval: interval)
+    
+    node9 = factory.node(key: 2, take: node5, skip: factory.zeroPointer, isIncluded: true)
+    // {{[2,6], [10,15], [20,25]}} + [5,21] = {{[2,25]}}
+    XCTAssertEqual(morphism.apply(on: node10), node9)
+    
+    
+    interval = Interval(intvl: .intvl(lbracket: .i, a: 15, b: 21, rbracket: .i))
+    morphism = morphisms.insert(interval: interval)
+    node7 = factory.node(key: 15, take: node1, skip: factory.zeroPointer, isIncluded: true)
+    node9 = factory.node(key: 6, take: factory.zeroPointer, skip: node7, isIncluded: true)
+    node10 = factory.node(key: 2, take: node9, skip: factory.zeroPointer, isIncluded: true)
+        
+    // {{[20,25], [2,6]}} + [15,21] = {{[15,25], [2,6]}}
+    XCTAssertEqual(morphism.apply(on: node4), node10)
+    
+    interval = Interval(intvl: .intvl(lbracket: .i, a: 21, b: 25, rbracket: .i))
+    morphism = morphisms.insert(interval: interval)
+    // {{[20,25], [2,6]}} + [21,25] = {{[20,25], [2,6]}}
+    XCTAssertEqual(morphism.apply(on: node4), node4)
+    
   }
   
 //  func testNodeCreation() {

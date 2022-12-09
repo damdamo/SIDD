@@ -66,7 +66,7 @@ extension SIDD {
       // 𝛕 = ⊥
       } else if factory.isTerminal(take) {
         // σ != ⊤
-        if !factory.isTerminal(skip) {
+        if skip != factory.onePointer {
           result = apply(on: skip)
         // σ = ⊤
         } else {
@@ -93,8 +93,8 @@ extension SIDD {
             isIncluded: pointer.pointee.isIncluded)
           let upperNode = factory.node(
             key: b,
-            take: node1,
-            skip: factory.onePointer,
+            take: factory.zeroPointer,
+            skip: node1,
             isIncluded: interval.rbracket == .i)
           result = factory.node(
             key: a,
@@ -102,14 +102,9 @@ extension SIDD {
             skip: factory.zeroPointer,
             isIncluded: interval.lbracket == .i)
         } else if a < k && b >= k && b <= kp {
-          let node1 = factory.node(
-            key: k,
-            take: take,
-            skip: skip,
-            isIncluded: pointer.pointee.isIncluded)
           result = factory.node(
             key: a,
-            take: node1,
+            take: take,
             skip: factory.zeroPointer,
             isIncluded: interval.lbracket == .i)
         } else if a >= k && b <= kp {
@@ -204,11 +199,22 @@ extension SIDD {
           }
         // σ != (⊤ ∨ ⊥)
         } else {
-          result = factory.node(
-            key: k,
-            take: factory.zeroPointer,
-            skip: apply(on: skip),
-            isIncluded: pointer.pointee.isIncluded)
+          let kp = skip.pointee.key
+          if a <= k && b < kp {
+            result = factory.node(
+              key: b,
+              take: factory.zeroPointer,
+              skip: skip,
+              isIncluded: pointer.pointee.isIncluded)
+          } else if a <= k && b >= kp {
+            result = applyTau(on: skip)
+          } else {
+            result = factory.node(
+              key: k,
+              take: factory.zeroPointer,
+              skip: apply(on: skip),
+              isIncluded: pointer.pointee.isIncluded)
+          }
         }
       // 𝛕 != ⊥ ∧ σ = ⊥
       } else if skip == factory.zeroPointer {
