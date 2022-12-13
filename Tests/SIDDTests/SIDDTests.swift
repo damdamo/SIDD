@@ -110,6 +110,9 @@ final class SIDDTests: XCTestCase {
 
     // Union: {{[3,5]}, {[3,5], [7,9]}} U {{[3,6]}} = {{[3,5]}, {[3,5], [7,9]}, {[3,6]}}
     XCTAssertEqual(node11, factory.union(node4, node6))
+    
+    // Check that previous computation has been cached !
+    XCTAssertNotNil(factory.cache.union[[node4, node6]])
   }
   
   func testInsertion() {
