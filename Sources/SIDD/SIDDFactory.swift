@@ -111,17 +111,48 @@ public final class SIDDFactory<Key>: DecisionDiagramFactory where Key: Comparabl
     }
   }
 
-  public func encode<S>(family: S) -> SIDD<Key>
-    where S: Sequence, S.Element: Sequence, S.Element.Element == Key
-  {
-    let pointer = family.map({ (member: S.Element) -> SIDD<Key>.Pointer in
-      var ptr = onePointer
-      for key in Set(member).sorted().reversed() {
-        ptr = node(key: key, take: ptr, skip: zeroPointer, isIncluded: true)
-      }
-      return ptr
-    })
-    return SIDD(pointer: union(of: pointer), factory: self)
+//  public func encode<S>(family: S) -> SIDD<Key>
+//    where S: Sequence, S.Element: Sequence, S.Element.Element == Key
+//  {
+//    let pointer = family.map({ (member: S.Element) -> SIDD<Key>.Pointer in
+//      var ptr = onePointer
+//      for key in Set(member).sorted().reversed() {
+//        ptr = node(key: key, take: ptr, skip: zeroPointer, isIncluded: true)
+//      }
+//      return ptr
+//    })
+//    return SIDD(pointer: union(of: pointer), factory: self)
+//  }
+//
+  
+  public func encode(family: FamilySetsIntervals<Key>) -> SIDD<Key> {
+    if family.familySetsIntervals == [] {
+      return zero
+    }
+    var res: SIDD<Key> = zero
+    for el in family.familySetsIntervals {
+      res = res.union(encode(set: el))
+    }
+    return res
+  }
+  
+  public func encode(set: SetIntervals<Key>) -> SIDD<Key> {
+    if set.setIntervals == [] {
+      return one
+    }
+    
+    // Intervals are ordered from the greater one to the lower one.
+    let revertOrderedSet = set.setIntervals.sorted(by: {!($0.lowerBound! < $1.lowerBound! || ($0.lowerBound! == $1.lowerBound! && $0.upperBound! <= $1.upperBound!))})
+    
+    var upperNode: SIDD<Key>.Pointer = zeroPointer
+    var lowerNode: SIDD<Key>.Pointer = onePointer
+    
+    for el in revertOrderedSet {
+      upperNode = self.node(key: el.upperBound!, take: zeroPointer, skip: lowerNode, isIncluded: el.rbracket! == .i ? true : false )
+      lowerNode = self.node(key: el.lowerBound!, take: upperNode, skip: zeroPointer, isIncluded: el.lbracket! == .i ? true : false)
+    }
+    
+    return SIDD(pointer: lowerNode, factory: self)
   }
   
   public func decode(sidd: SIDD<Key>) -> FamilySetsIntervals<Key> {
@@ -212,14 +243,14 @@ public final class SIDDFactory<Key>: DecisionDiagramFactory where Key: Comparabl
   ///
   /// - Returns: A SIDD node corresponding to the given parameters.
   public func node(key: Key, take: SIDD<Key>.Pointer, skip: SIDD<Key>.Pointer, isIncluded: Bool) -> SIDD<Key>.Pointer {
-//    guard take != zeroPointer
-//      else { return skip }
     precondition(
       take != self.onePointer,
       "Invalid declaration of an SIDD: tau value cannot contain top value")
-    precondition(
-      isTerminal(take) || key < take.pointee.key,
-      "Invalid variable ordering: the take branch should have a greater key.")
+    if !(isTerminal(take) || key < take.pointee.key) {
+      guard (key == take.pointee.key && isIncluded == true && take.pointee.isIncluded == true) else {
+        preconditionFailure("Invalid variable ordering: the take branch should have a greater key or the interval should contain a single value between square brackets")
+      }
+    }
     precondition(
       isTerminal(skip) || key < skip.pointee.key,
       "Invalid variable ordering: the skip branch should have a greater key.")

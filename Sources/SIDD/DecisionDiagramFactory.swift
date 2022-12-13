@@ -7,8 +7,8 @@ public protocol DecisionDiagramFactory: AnyObject {
   /// - Parameter family: The family to encode as a decision diagram.
   ///
   /// - Returns: The decision diagram that encodes the given family.
-  func encode<S>(family: S) -> DD
-    where S: Sequence, S.Element: Sequence, S.Element.Element == DD.Element.Element
+//  func encode<S>(family: S) -> DD
+//    where S: Sequence, S.Element: Sequence, S.Element.Element == DD.Element.Element
 
   /// A Boolean value indicating whether the given family has no member.
   func isEmpty(_ pointer: DD.Pointer) -> Bool

@@ -2,7 +2,31 @@ import XCTest
 @testable import SIDD
 
 final class SIDDTests: XCTestCase {
-
+  
+  func testEncode() {
+    let factory = SIDDFactory<Int>()
+    let interval1: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 1, b: 5, rbracket: .i))
+    let interval2: Interval<Int> = Interval(intvl: .intvl(lbracket: .e, a: 6, b: 7, rbracket: .i))
+    let interval3: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 8, b: 10, rbracket: .e))
+    let interval4: Interval<Int> = Interval(intvl: .intvl(lbracket: .e, a: 15, b: 20, rbracket: .i))
+//    let interval5: Interval<Int> = Interval(intvl: .intvl(lbracket: .i, a: 22, b: 22, rbracket: .i))
+    
+    let set1 = SetIntervals(setIntervals: [interval1, interval2, interval3, interval4])
+    let set2 = SetIntervals(setIntervals: [interval1, interval2, interval3])
+    let set3 = SetIntervals(setIntervals: [interval1, interval2])
+    let set4 = SetIntervals<Int>(setIntervals: [])
+    
+    let family = FamilySetsIntervals(familySetsIntervals: [set1, set2, set3, set4])
+    
+    let decEnc = factory.decode(sidd: factory.encode(family: family))
+    
+    // enc({}) = ⊥
+    XCTAssertEqual(factory.encode(family: FamilySetsIntervals(familySetsIntervals: [])), factory.zero)
+    // Family: {{[1,5], (6,7]}, {(15,20], [1,5], [8,10), (6,7]}, {[8,10), [1,5], (6,7]}, {}}
+    XCTAssertEqual(decEnc, family)
+//    print(decEnc)
+  }
+  
   func testDecode() {
     let factory = SIDDFactory<Int>()
     var node1 = factory.node(key: 5, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: false)
@@ -134,7 +158,7 @@ final class SIDDTests: XCTestCase {
     node5 = factory.node(key: 25, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
     node6 = factory.node(key: 20, take: node5, skip: factory.zeroPointer, isIncluded: true)
     var node7 = factory.node(key: 15, take: factory.zeroPointer, skip: node6, isIncluded: true)
-    var node8 = factory.node(key: 10, take: node7, skip: factory.zeroPointer, isIncluded: true)
+    let node8 = factory.node(key: 10, take: node7, skip: factory.zeroPointer, isIncluded: true)
     var node9 = factory.node(key: 6, take: factory.zeroPointer, skip: node8, isIncluded: true)
     var node10 = factory.node(key: 2, take: node9, skip: factory.zeroPointer, isIncluded: true)
     

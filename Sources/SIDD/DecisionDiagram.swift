@@ -31,24 +31,24 @@ extension DecisionDiagram {
     Self.init(pointer: factory.union(pointer, other.pointer), factory: factory)
   }
 
-  /// Returns a new family with the members of both this family and the given one.
-  public func union<Family>(_ other: Family) -> Self
-    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
-  {
-    union(factory.encode(family: other))
-  }
+//  /// Returns a new family with the members of both this family and the given one.
+//  public func union<Family>(_ other: Family) -> Self
+//    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
+//  {
+//    union(factory.encode(family: other))
+//  }
 
   /// Returns a new family with the members that are common to both this family and the given one.
   public func intersection(_ other: Self) -> Self {
     Self.init(pointer: factory.intersection(pointer, other.pointer), factory: factory)
   }
 
-  /// Returns a new family with the members that are common to both this family and the given one.
-  public func intersection<Family>(_ other: Family) -> Self
-    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
-  {
-    intersection(factory.encode(family: other))
-  }
+//  /// Returns a new family with the members that are common to both this family and the given one.
+//  public func intersection<Family>(_ other: Family) -> Self
+//    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
+//  {
+//    intersection(factory.encode(family: other))
+//  }
 
   /// Returns a new family with the members that are either in this family or in the given family,
   /// but not in both.
@@ -56,25 +56,25 @@ extension DecisionDiagram {
     Self.init(pointer: factory.symmetricDifference(pointer, other.pointer), factory: factory)
   }
 
-  /// Returns a new family with the members that are either in this family or in the given family,
-  /// but not in both.
-  public func symmetricDifference<Family>(_ other: Family) -> Self
-    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
-  {
-    symmetricDifference(factory.encode(family: other))
-  }
+//  /// Returns a new family with the members that are either in this family or in the given family,
+//  /// but not in both.
+//  public func symmetricDifference<Family>(_ other: Family) -> Self
+//    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
+//  {
+//    symmetricDifference(factory.encode(family: other))
+//  }
 
   /// Returns a new family containing the members of this family that are not in the given family.
   public func subtracting(_ other: Self) -> Self {
     Self.init(pointer: factory.subtraction(pointer, other.pointer), factory: factory)
   }
 
-  /// Returns a new family containing the members of this family that are not in the given family.
-  public func subtracting<Family>(_ other: Family) -> Self
-    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
-  {
-    subtracting(factory.encode(family: other))
-  }
+//  /// Returns a new family containing the members of this family that are not in the given family.
+//  public func subtracting<Family>(_ other: Family) -> Self
+//    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
+//  {
+//    subtracting(factory.encode(family: other))
+//  }
 
   /// Returns a Boolean value that indicates whether this family has no members in common with the
   /// given family.
@@ -82,13 +82,13 @@ extension DecisionDiagram {
     intersection(other).isEmpty
   }
 
-  /// Returns a Boolean value that indicates whether this family has no members in common with the
-  /// given family.
-  public func isDisjoint<Family>(with other: Family) -> Bool
-    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
-  {
-    intersection(other).isEmpty
-  }
+//  /// Returns a Boolean value that indicates whether this family has no members in common with the
+//  /// given family.
+//  public func isDisjoint<Family>(with other: Family) -> Bool
+//    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
+//  {
+//    intersection(other).isEmpty
+//  }
 
   /// Returns a Boolean value that indicates whether this family is a strict subset of another
   /// family.
@@ -96,13 +96,13 @@ extension DecisionDiagram {
     (self != other) && subtracting(other).isEmpty
   }
 
-  /// Returns a Boolean value that indicates whether this family is a strict subset of another
-  /// family.
-  public func isStrictSubset<Family>(of other: Family) -> Bool
-    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
-  {
-    isStrictSubset(of: factory.encode(family: other))
-  }
+//  /// Returns a Boolean value that indicates whether this family is a strict subset of another
+//  /// family.
+//  public func isStrictSubset<Family>(of other: Family) -> Bool
+//    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
+//  {
+//    isStrictSubset(of: factory.encode(family: other))
+//  }
 
   /// Returns a Boolean value that indicates whether this family is a strict superset of the given
   /// family.
@@ -110,12 +110,12 @@ extension DecisionDiagram {
     (self != other) && other.subtracting(self).isEmpty
   }
 
-  /// Returns a Boolean value that indicates whether this family is a strict superset of the given
-  /// family.
-  public func isStrictSuperset<Family>(of other: Family) -> Bool
-    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
-  {
-    isStrictSuperset(of: factory.encode(family: other))
-  }
+//  /// Returns a Boolean value that indicates whether this family is a strict superset of the given
+//  /// family.
+//  public func isStrictSuperset<Family>(of other: Family) -> Bool
+//    where Family: Sequence, Family.Element: Sequence, Family.Element.Element == Element.Element
+//  {
+//    isStrictSuperset(of: factory.encode(family: other))
+//  }
 
 }
