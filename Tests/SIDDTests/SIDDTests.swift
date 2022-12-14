@@ -163,6 +163,30 @@ final class SIDDTests: XCTestCase {
     print(factory.decode(sidd: SIDD(pointer: node5, factory: factory)))
   }
   
+  func testDifference() {
+    let factory = SIDDFactory<Int>()
+    let node1 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    let node2 = factory.node(key: 7, take: node1, skip: factory.onePointer, isIncluded: true)
+    let node3 = factory.node(key: 5, take: factory.zeroPointer, skip: node2, isIncluded: true)
+    let node4 = factory.node(key: 3, take: node3, skip: factory.zeroPointer, isIncluded: true)
+    
+    let node5 = factory.node(key: 5, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    let node6 = factory.node(key: 3, take: node5, skip: factory.zeroPointer, isIncluded: true)
+    
+    let node7 = factory.node(key: 7, take: node1, skip: factory.zeroPointer, isIncluded: true)
+    let node8 = factory.node(key: 5, take: factory.zeroPointer, skip: node7, isIncluded: true)
+    let node9 = factory.node(key: 3, take: node8, skip: factory.zeroPointer, isIncluded: true)
+    
+
+    // Difference: {{[7,9], [3,5]}, {[3,5]}} \ {{[3,5]}} = {{[7,9], [3,5]}}
+    XCTAssertEqual(factory.subtraction(node4, node6), node9)
+        
+//    print(factory.decode(sidd: SIDD(pointer: node4, factory: factory)))
+//    print(factory.decode(sidd: SIDD(pointer: node6, factory: factory)))
+//    print(factory.decode(sidd: SIDD(pointer: node9, factory: factory)))
+
+  }
+  
   func testInsertion() {
     var morphisms: SIDDMorphismFactory<Int> {factory.morphisms}
     let factory = SIDDFactory<Int>()

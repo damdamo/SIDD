@@ -171,7 +171,6 @@ extension SIDDFactory {
     
     cache.intersection[cacheKey] = result
     return result
-      
     
   }
   
@@ -282,46 +281,102 @@ extension SIDDFactory {
     _ rhs: SIDD<Key>.Pointer
   ) -> SIDD<Key>.Pointer
   {
-//    // Check for trivial cases.
-//    if lhs == zeroPointer || rhs == zeroPointer {
-//      return lhs
-//    } else if lhs == rhs {
-//      return zeroPointer
-//    }
-//
-//    // Query the cache.
-//    let cacheKey = lhs < rhs ? [lhs, rhs] : [rhs, lhs]
-//    if let pointer = cache.subtraction[cacheKey] {
-//      return pointer
-//    }
-//
-//    // Compute `lhs` subtracting `rhs`.
-//    let result: SIDD<Key>.Pointer
-//    if lhs == onePointer {
-//      result = skipMost(rhs) == zeroPointer ? lhs : zeroPointer
-//    } else if rhs == onePointer {
-//      result = node(
-//        key: lhs.pointee.key,
-//        take: lhs.pointee.take,
-//        skip: subtraction(lhs.pointee.skip, rhs))
-//    } else if lhs.pointee.key < rhs.pointee.key {
-//      result = node(
-//        key: lhs.pointee.key,
-//        take: lhs.pointee.take,
-//        skip: subtraction(lhs.pointee.skip, rhs))
-//    } else if lhs.pointee.key == rhs.pointee.key {
-//      result = node(
-//        key: lhs.pointee.key,
-//        take: subtraction(lhs.pointee.take, rhs.pointee.take),
-//        skip: subtraction(lhs.pointee.skip, rhs.pointee.skip))
-//    } else {
-//      result = subtraction(lhs, rhs.pointee.skip)
-//    }
-//
-//    cache.subtraction[cacheKey] = result
-//    return result
-    return self.zeroPointer
+    // Check for trivial cases.
+    if lhs == zeroPointer || rhs == zeroPointer {
+      return lhs
+    } else if lhs == rhs {
+      return zeroPointer
+    } else if rhs == onePointer {
+      return node(
+        key: lhs.pointee.key,
+        take: lhs.pointee.take,
+        skip: subtraction(lhs.pointee.skip, onePointer),
+        isIncluded: lhs.pointee.isIncluded)
+    }
 
+    // Query the cache.
+    let cacheKey = lhs < rhs ? [lhs, rhs] : [rhs, lhs]
+    if let pointer = cache.subtraction[cacheKey] {
+      return pointer
+    }
+      
+    let result: SIDD<Key>.Pointer
+    let takeSubtraction = subtractionTau(lhs.pointee.take, rhs.pointee.take)
+    let skipSubtraction = subtraction(lhs.pointee.skip, rhs.pointee.skip)
+    if takeSubtraction == zeroPointer {
+      if skipSubtraction == zeroPointer {
+        result = zeroPointer
+      } else {
+        result = subtraction(lhs.pointee.skip, rhs.pointee.skip)
+      }
+    } else {
+      if lhs.pointee.key < rhs.pointee.key {
+        result = node(
+          key: lhs.pointee.key,
+          take: lhs.pointee.take,
+          skip: subtraction(lhs.pointee.skip, rhs),
+          isIncluded: lhs.pointee.isIncluded)
+      } else if lhs.pointee.key == rhs.pointee.key {
+        result = node(
+          key: lhs.pointee.key,
+          take: takeSubtraction,
+          skip: skipSubtraction,
+          isIncluded: lhs.pointee.isIncluded)
+      } else {
+        result = subtraction(lhs, rhs.pointee.skip)
+      }
+    }
+    
+    cache.subtraction[cacheKey] = result
+    return result
+  }
+  
+  /// Returns `lhs` subtracting `rhs`.
+  public func subtractionTau(
+    _ lhs: SIDD<Key>.Pointer,
+    _ rhs: SIDD<Key>.Pointer
+  ) -> SIDD<Key>.Pointer
+  {
+    // Check for trivial cases.
+    if lhs == zeroPointer || rhs == zeroPointer {
+      return lhs
+    } else if lhs == rhs {
+      return zeroPointer
+    }
+
+    // Query the cache.
+    let cacheKey = lhs < rhs ? [lhs, rhs] : [rhs, lhs]
+    if let pointer = cache.subtraction[cacheKey] {
+      return pointer
+    }
+      
+    let result: SIDD<Key>.Pointer
+    let takeSubtraction = subtractionTau(lhs.pointee.take, rhs.pointee.take)
+    let skipSubtraction = subtraction(lhs.pointee.skip, rhs.pointee.skip)
+    
+    if takeSubtraction == zeroPointer && skipSubtraction == zeroPointer {
+      result = zeroPointer
+    } else {
+      if lhs.pointee.key < rhs.pointee.key {
+        result = node(
+          key: lhs.pointee.key,
+          take: subtractionTau(lhs.pointee.take, rhs),
+          skip: lhs.pointee.skip,
+          isIncluded: lhs.pointee.isIncluded)
+      } else if lhs.pointee.key == rhs.pointee.key {
+        result = node(
+          key: lhs.pointee.key,
+          take: takeSubtraction,
+          skip: skipSubtraction,
+          isIncluded: lhs.pointee.isIncluded)
+      } else {
+        result = subtractionTau(lhs, rhs.pointee.take)
+      }
+    }
+    
+    cache.subtraction[cacheKey] = result
+    return result
+    
   }
 
   /// Returns the terminal obtained by following the skip branch of the given SIDD.
