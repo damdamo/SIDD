@@ -115,6 +115,54 @@ final class SIDDTests: XCTestCase {
     XCTAssertNotNil(factory.cache.union[[node4, node6]])
   }
   
+  func testIntersection() {
+    let factory = SIDDFactory<Int>()
+    var node1 = factory.node(key: 7, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    var node2 = factory.node(key: 5, take: node1, skip: factory.zeroPointer, isIncluded: true)
+    var node3 = factory.node(key: 3, take: factory.zeroPointer, skip: node2, isIncluded: true)
+    var node4 = factory.node(key: 1, take: node3, skip: factory.zeroPointer, isIncluded: true)
+    
+    var node5 = factory.node(key: 9, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    let node6 = factory.node(key: 8, take: node5, skip: factory.zeroPointer, isIncluded: true)
+    let node7 = factory.node(key: 3, take: factory.zeroPointer, skip: node6, isIncluded: true)
+    let node8 = factory.node(key: 1, take: node7, skip: factory.zeroPointer, isIncluded: true)
+    
+
+    // Intersection: {{[1,3], [5,7]}} ∩ {{[8,9], [1,3]}} = ⊥
+    XCTAssertEqual(factory.intersection(node4, node8), factory.zeroPointer)
+    
+    node1 = factory.node(key: 7, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    node2 = factory.node(key: 4, take: node1, skip: factory.onePointer, isIncluded: true)
+    node3 = factory.node(key: 1, take: node2, skip: factory.onePointer, isIncluded: true)
+    
+    node4 = factory.node(key: 7, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    node5 = factory.node(key: 1, take: node4, skip: factory.zeroPointer, isIncluded: true)
+    
+    // Intersection: {{}} ∩ {{[1,4]}, {}, {[1,7]}} = {{}}
+    XCTAssertEqual(factory.intersection(factory.onePointer, node3), factory.onePointer)
+    // Intersection: {{[1,4]}, {}, {[1,7]}} ∩ {{}} = {{}}
+    XCTAssertEqual(factory.intersection(node3, factory.onePointer), factory.onePointer)
+    // Intersection: {{[1,4]}, {}, {[1,7]}} ∩ {{[1,7]}} = {{[1,7]}}
+    XCTAssertEqual(factory.intersection(node3, node5), node5)
+    // Intersection: {{[1,7]}} ∩ {{[1,4]}, {}, {[1,7]}} = {{[1,7]}}
+    XCTAssertEqual(factory.intersection(node3, node5), node5)
+    // Intersection: {{[1,4]}, {}, {[1,7]}} ∩ {[1,4]}, {}, {[1,7]}} = {[1,4]}, {}, {[1,7]}}
+    XCTAssertEqual(factory.intersection(node3, node3), node3)
+    
+    node1 = factory.node(key: 7, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    node2 = factory.node(key: 4, take: node1, skip: factory.zeroPointer, isIncluded: true)
+    node3 = factory.node(key: 1, take: node1, skip: node2, isIncluded: true)
+    
+    node4 = factory.node(key: 7, take: factory.zeroPointer, skip: factory.onePointer, isIncluded: true)
+    node5 = factory.node(key: 4, take: node4, skip: factory.zeroPointer, isIncluded: true)
+    
+    // Intersection: {{[4,7]}, {[1,7]}} ∩ {{[4,7]}} = {{[4,7]}}
+    XCTAssertEqual(factory.intersection(node3, node5), node5)
+    
+    print(factory.decode(sidd: SIDD(pointer: node3, factory: factory)))
+    print(factory.decode(sidd: SIDD(pointer: node5, factory: factory)))
+  }
+  
   func testInsertion() {
     var morphisms: SIDDMorphismFactory<Int> {factory.morphisms}
     let factory = SIDDFactory<Int>()
